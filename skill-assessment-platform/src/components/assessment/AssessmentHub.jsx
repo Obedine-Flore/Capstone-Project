@@ -9,7 +9,7 @@ const Assessment = () => {
       <header className="flex justify-between items-center p-4 shadow-md bg-white">
         <h1 className="text-2xl font-bold text-green-700">SkillsAssess</h1>
         <nav className="space-x-6">
-          <a href="/" className="text-gray-700">Dashboard</a>
+          <a href="/dashboard" className="text-gray-700">Dashboard</a>
           <a href="#" className="text-green-700 font-semibold">Assessments</a>
           <a href="#" className="text-gray-700">Peer Reviews</a>
           <a href="/blog" className="text-gray-700">Blog</a>

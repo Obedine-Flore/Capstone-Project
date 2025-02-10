@@ -20,7 +20,7 @@ const Dashboard = () => {
         <nav className="space-x-6">
           <a href="#" className="text-green-700 font-semibold">Dashboard</a>
           <a href="/assessments" className="text-gray-700">Assessments</a>
-          <a href="#" className="text-gray-700">Peer Reviews</a>
+          <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
           <a href="/blog" className="text-gray-700">Blog</a>  
         </nav>
         <Link to="/profile">
