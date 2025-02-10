@@ -1,13 +1,24 @@
-// import React from 'react';
-import Layout from './components/layout/Layout';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/dashboard/Dashboard';
-import global from './styles/global';
+import AssessmentHub from './components/assessment/AssessmentHub';
+import QuestionScreen from './components/assessment/QuestionScreen';
+import AssessmentReport from './components/assessment/AssessmentReport';
+import ProfileSection from "./components/Profile/ProfileSection";
+import BlogLandingPage from "./components/blog/BlogLandingPage";
 
 const App = () => {
   return (
-    <Layout>
-      <Dashboard />
-    </Layout>
+    <Router>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/assessments" element={<AssessmentHub />} />
+          <Route path="/assessments/QuestionScreen" element={<QuestionScreen />} />
+          <Route path="/assessments/AssessmentReport" element={<AssessmentReport />} />
+          <Route path="/Profile" element={<ProfileSection />} />
+          <Route path="/blog" element={<BlogLandingPage />} />
+          {/* Add other routes if needed */}
+        </Routes>
+    </Router>
   );
 };
 

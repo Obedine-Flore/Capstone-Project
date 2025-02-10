@@ -1,5 +1,6 @@
 import React from 'react';
 import { Bell, User, Menu, X, ChevronDown } from 'lucide-react';
+import { Link } from "react-router-dom";
 
 const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   return (
@@ -22,10 +23,12 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }) => {
             <button className="p-2 rounded-full hover:bg-gray-100">
               <Bell size={20} />
             </button>
-            <button className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100">
+
+            {/* Link to Profile Page */}
+            <Link to="/profile" className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100">
               <User size={20} />
               <ChevronDown size={16} />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
