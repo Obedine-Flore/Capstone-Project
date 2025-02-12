@@ -1,20 +1,41 @@
 import React, { useState } from 'react';
-//import { Button } from '@/components/ui/button'; // Import Button from shadcn/ui
+import axios from 'axios';  // Import Axios to make API calls
 
 const SignUp = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [termsAgreed, setTermsAgreed] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  // API URL (Replace with your actual backend URL)
+  const API_URL = 'http://localhost:5000/auth/register';
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your sign-up logic here
-    if (termsAgreed) {
-      console.log('Sign up attempt:', { name, email, password });
-      // Implement your sign-up logic here
-    } else {
+
+    if (!termsAgreed) {
       alert('Please agree to the terms and conditions');
+      return;
+    }
+
+    // Prepare user data
+    const userData = { name, email, password };
+
+    try {
+      setIsLoading(true);
+      const response = await axios.post(API_URL, userData);
+      console.log('User registered:', response.data);
+      // Handle successful registration (e.g., redirect to login page or show a success message)
+      // You can also store the user data or token if needed
+      window.location.href = '/SignIn'; // Redirect to the sign-in page
+    } catch (err) {
+      setError('Registration failed. Please try again.');
+      console.error('Error during registration:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,9 +90,11 @@ const SignUp = () => {
           <button
             type="submit"
             className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-300"
+            disabled={isLoading}
           >
-            Sign Up
+            {isLoading ? 'Signing up...' : 'Sign Up'}
           </button>
+          {error && <p className="text-red-600 text-center mt-4">{error}</p>}
           <div className="mt-4 text-center">
             <span className="text-gray-600 text-sm">
               Already have an account?{' '}
