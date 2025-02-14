@@ -1,76 +1,110 @@
-This is my README file.
+### Skill Development Self-Assessment Platform
 
-import React, { useState } from 'react';
-import Navbar from './Navbar';
-import Sidebar from './Sidebar';
+## Description
 
-const Layout = ({ children }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+The Skill Development Self-Assessment Platform is a web-based application designed to help individuals evaluate their skills, identify gaps, and receive recommendations for improvement. Users can take assessments, receive detailed reports, and track their progress over time. The platform features an intuitive UI built with React and Tailwind CSS, a backend powered by Node.js and MySQL, and secure authentication.
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
-      <div className="flex">
-        <Sidebar isOpen={isSidebarOpen} />
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-};
+## GitHub Repository
 
-export default Layout;
+https://github.com/Obedine-Flore/Capstone-Project.git
 
-import React from "react";
+## Setup Instructions
 
-const ProfileSection = () => {
-  // Mock user data (Replace with dynamic data from API or context)
-  const user = {
-    name: "John Doe",
-    email: "johndoe@example.com",
-    bio: "Aspiring software developer passionate about AI and Web Development.",
-    avatar: "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.istockphoto.com%2Fphotos%2Fheadshot&psig=AOvVaw2DVAJFk9W0HpgYoPI0aJrr&ust=1739026192987000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCKCetKXosYsDFQAAAAAdAAAAABAE",
-    skills: ["React", "Node.js", "Tailwind CSS", "Problem-Solving"],
-  };
+# Prerequisites
 
-  return (
-    <div className="bg-white shadow-lg rounded-2xl p-6 max-w-md mx-auto mt-10">
-      {/* Profile Avatar */}
-      <div className="flex flex-col items-center">
-        <img
-          src={user.avatar}
-          alt="User Avatar"
-          className="w-24 h-24 rounded-full border-4 border-blue-500"
-        />
-        <h2 className="text-xl font-semibold mt-3">{user.name}</h2>
-        <p className="text-gray-500">{user.email}</p>
-        <p className="text-gray-700 text-sm text-center mt-2">{user.bio}</p>
-      </div>
+Ensure you have the following installed on your system:
 
-      {/* Skills Section */}
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold">Skills</h3>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {user.skills.map((skill, index) => (
-            <span
-              key={index}
-              className="bg-blue-500 text-white text-sm font-medium px-3 py-1 rounded-full"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
+* Node.js (Latest LTS version recommended)
 
-      {/* Edit Profile Button */}
-      <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg">
-        Edit Profile
-      </button>
-    </div>
-  );
-};
+* MySQL
 
-export default ProfileSection;
+* Git
+
+# Clone the Repository
+
+git clone [https://github.com/Obedine-Flore/Capstone-Project.git]
+cd skill-assessment-platform
+
+# Backend Setup
+
+1. Navigate to the backend directory:
+
+cd skills-assess-backend
+
+2. Install dependencies:
+
+npm install
+
+3. Configure environment variables:
+
+* Create a .env file in the backend directory and set up the following variables:
+
+PORT=5000
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=password
+DB_NAME=SkillsAssess
+
+4. Initialize the database:
+
+Run MySQL and create the database manually:
+
+CREATE DATABASE skill_assessment_db;
+
+5. Start the backend server:
+
+npm start
+
+# Frontend Setup
+
+1. Navigate to the frontend directory:
+
+cd skills-assessment-platform
+
+2. Install dependencies:
+
+npm install
+
+3. Start the development server:
+
+npm run dev
+
+## Deployment Plan
+
+# Backend Deployment
+
+I would use the Heroku cloud platform to deploy the Node.js backend.
+
+I would set up a MySQL database on Amazon RDS, DigitalOcean Managed Databases, or another cloud provider.
+
+I would configure PM2 to keep the backend running.
+
+I would use Nginx or as a reverse proxy to manage API requests.
+
+# Frontend Deployment
+
+I would deploy the React application using Netlify.
+
+Ensuring the frontend communicates with the deployed backend via the correct API endpoints.
+
+# Database Deployment
+
+Use Amazon RDS, DigitalOcean Managed Databases, or a self-hosted MySQL instance.
+
+Secure the database with proper authentication and access control.
+
+Implement database backups and monitoring tools.
+
+# Environment Variables
+
+Store secrets securely using dotenv files (.env), AWS Secrets Manager, or environment variables on the cloud platform.
+
+# Continuous Deployment (CI/CD)
+
+Use GitHub Actions, Jenkins, or Travis CI to automate deployments.
+
+Set up automatic deployments on push to main or a designated deployment branch.
+
+## Video Demo
+
+[Insert Link to Video Demo]
