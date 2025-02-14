@@ -70,9 +70,24 @@ Run MySQL and create the database manually:
 
 `npm run dev`
 
-## Figma Mockup
+## Designs
+### Figma Mockup
 
-Link: https://www.figma.com/design/kop3vnP1GSGure8CmyM3TV/SkillsAssess?node-id=0-1&t=qpz0jFdTdZXFKTpW-1
+Link:https://www.figma.com/design/kop3vnP1GSGure8CmyM3TV/SkillsAssess?node-id=0-1&t=qpz0jFdTdZXFKTpW-1
+
+## App Interface
+
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLanding.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessContact)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLogin.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessDashboard.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessAssessments.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessBlog.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessProfile.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessQuestions.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessReport.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/Database.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssess_System%20Architecture.drawio.png)
 
 ## Deployment Plan
 
@@ -110,21 +125,6 @@ Use GitHub Actions, Jenkins, or Travis CI to automate deployments.
 
 Set up automatic deployments on push to main or a designated deployment branch.
 
-## App Interface
-
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessAssessments.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessBlog.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessContact)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessDashboard.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLanding.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLogin.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessProfile.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessQuestions.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessReport.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/Database.png)
-
-
-
 ## Video Demo
 
-[Insert Link to Video Demo]
+https://drive.google.com/file/d/1tF8Z5SVkptgX4GGKRcnFkx1-khx4GRFn/view?usp=sharing
