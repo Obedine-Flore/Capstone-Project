@@ -41,10 +41,15 @@ Ensure you have the following installed on your system:
 
 
 PORT=5000
+
 DB_HOST=localhost
+
 DB_USER=root
+
 DB_PASSWORD=password
+
 DB_NAME=SkillsAssess
+
 
 4. Initialize the database:
 
@@ -93,7 +98,7 @@ Link:https://www.figma.com/design/kop3vnP1GSGure8CmyM3TV/SkillsAssess?node-id=0-
 ### Backend Deployment
 The Node.js backend will be deployed using the Heroku cloud platform.
 
-A MySQL database will be set up on Amazon RDS, DigitalOcean Managed Databases, or another cloud provider.
+A MySQL database will be set up on Amazon RDS.
 
 PM2 will be configured to keep the backend running efficiently.
 
@@ -105,14 +110,14 @@ The React application will be deployed using Netlify.
 Proper configuration will ensure that the frontend communicates seamlessly with the deployed backend via the correct API endpoints.
 
 ### Database Deployment
-The database will be deployed using Amazon RDS, DigitalOcean Managed Databases, or a self-hosted MySQL instance.
+The database will be deployed using Amazon RDS or a self-hosted MySQL instance.
 
 Security measures, including authentication and access control, will be implemented to protect the database.
 
 Database backups and monitoring tools will be set up to ensure reliability and data integrity.
 
 ### Environment Variables
-Sensitive information will be securely stored using dotenv files (.env), AWS Secrets Manager, or environment variables on the cloud platform.
+Sensitive information will be securely stored using dotenv files (.env) or environment variables on the cloud platform.
 
 ### Continuous Deployment (CI/CD)
 GitHub Actions, Jenkins, or Travis CI will be used to automate deployments.
