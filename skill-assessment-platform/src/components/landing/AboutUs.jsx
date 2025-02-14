@@ -38,7 +38,7 @@ const AboutUs = () => {
             <img 
               src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRimrMWSsaK8oYOHl6FVUamWxXjJ-MWaG5KTQ&s" 
               alt="SkillsAssess Frog Mascot" 
-              className="w-64 h-64 object-cover"
+              className="w-64 h-68 object-cover"
             />
           </div>
         </div>

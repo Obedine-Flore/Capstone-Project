@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, Download, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import profilePic from "../../assets/profile.jpg";
 
 const AssessmentReport = () => {
   const tableData = [
@@ -17,8 +18,8 @@ const AssessmentReport = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <header className="flex justify-between items-center p-4 shadow-md bg-white">
-        <h1 className="text-2xl font-bold text-green-700">SkillsAssess</h1>
+      <header className="flex justify-between items-center p-6 shadow-md bg-white rounded-lg">
+      <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
         <nav className="space-x-6">
           <a href="/dashboard" className="text-gray-700">Dashboard</a>
           <a href="#" className="text-green-700 font-semibold">Assessments</a>
@@ -26,7 +27,13 @@ const AssessmentReport = () => {
           <a href="/blog" className="text-gray-700">Blog</a>
         </nav>
         <Link to="/profile">
-          <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer"></div>
+          <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer">
+            <img
+            src={profilePic}
+            alt="Profile"
+            className="w-10 h-10 rounded-full object-cover shadow-md"
+            />
+          </div>
         </Link>
       </header>
 

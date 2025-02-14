@@ -1,4 +1,4 @@
-### Skill Development Self-Assessment Platform
+# Skill Development Self-Assessment Platform
 
 ## Description
 
@@ -10,7 +10,7 @@ https://github.com/Obedine-Flore/Capstone-Project.git
 
 ## Setup Instructions
 
-# Prerequisites
+### Prerequisites
 
 Ensure you have the following installed on your system:
 
@@ -20,24 +20,25 @@ Ensure you have the following installed on your system:
 
 * Git
 
-# Clone the Repository
+### Clone the Repository
 
-git clone [https://github.com/Obedine-Flore/Capstone-Project.git]
-cd skill-assessment-platform
+`git clone [https://github.com/Obedine-Flore/Capstone-Project.git]`
+`cd skill-assessment-platform`
 
-# Backend Setup
+### Backend Setup
 
 1. Navigate to the backend directory:
 
-cd skills-assess-backend
+`cd skills-assess-backend`
 
 2. Install dependencies:
 
-npm install
+`npm install`
 
 3. Configure environment variables:
 
 * Create a .env file in the backend directory and set up the following variables:
+
 
 PORT=5000
 DB_HOST=localhost
@@ -49,29 +50,33 @@ DB_NAME=SkillsAssess
 
 Run MySQL and create the database manually:
 
-CREATE DATABASE skill_assessment_db;
+`CREATE DATABASE skill_assessment_db`;
 
 5. Start the backend server:
 
-npm start
+`npm start`
 
-# Frontend Setup
+### Frontend Setup
 
 1. Navigate to the frontend directory:
 
-cd skills-assessment-platform
+`cd skills-assessment-platform`
 
 2. Install dependencies:
 
-npm install
+`npm install`
 
 3. Start the development server:
 
-npm run dev
+`npm run dev`
+
+## Figma Mockup
+
+Link: https://www.figma.com/design/kop3vnP1GSGure8CmyM3TV/SkillsAssess?node-id=0-1&t=qpz0jFdTdZXFKTpW-1
 
 ## Deployment Plan
 
-# Backend Deployment
+### Backend Deployment
 
 I would use the Heroku cloud platform to deploy the Node.js backend.
 
@@ -81,13 +86,13 @@ I would configure PM2 to keep the backend running.
 
 I would use Nginx or as a reverse proxy to manage API requests.
 
-# Frontend Deployment
+### Frontend Deployment
 
 I would deploy the React application using Netlify.
 
 Ensuring the frontend communicates with the deployed backend via the correct API endpoints.
 
-# Database Deployment
+### Database Deployment
 
 Use Amazon RDS, DigitalOcean Managed Databases, or a self-hosted MySQL instance.
 
@@ -95,15 +100,30 @@ Secure the database with proper authentication and access control.
 
 Implement database backups and monitoring tools.
 
-# Environment Variables
+### Environment Variables
 
 Store secrets securely using dotenv files (.env), AWS Secrets Manager, or environment variables on the cloud platform.
 
-# Continuous Deployment (CI/CD)
+### Continuous Deployment (CI/CD)
 
 Use GitHub Actions, Jenkins, or Travis CI to automate deployments.
 
 Set up automatic deployments on push to main or a designated deployment branch.
+
+## App Interface
+
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessAssessments.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessBlog.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessContact)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessDashboard.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLanding.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLogin.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessProfile.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessQuestions.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessReport.png)
+![Alt text](skill-assessment-platform/assets/app-interface-screenshots/Database.png)
+
+
 
 ## Video Demo
 

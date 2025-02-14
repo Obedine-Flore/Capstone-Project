@@ -1,77 +1,95 @@
-import { useState } from "react";
+import React from "react";
+import { Link } from 'react-router-dom';
+import profilePic from "../../assets/profile.jpg";
+import blogPic from "../../assets/blogimage.jpeg";
 
 const BlogLandingPage = () => {
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="min-h-screen flex flex-col justify-between px-8 py-6">
       {/* Navbar */}
-      <nav className="bg-white shadow-md p-4 flex justify-between items-center">
-        <h1 className="text-green-600 text-xl font-bold">SkillsAssess</h1>
-        <ul className="flex space-x-6 text-gray-700">
-          <li><a href="/">Dashboard</a></li>
-          <li><a href="/assessments">Assessments</a></li>
-          <li><a href="#">Peer Reviews</a></li>
-          <li className="text-green-600 font-bold">Blog</li>
-        </ul>
-      </nav>
+      <header className="flex justify-between items-center p-6 shadow-md bg-white rounded-lg">
+        <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
+        <nav className="space-x-6">
+          <a href="/dashboard" className="text-green-700 font-semibold">Dashboard</a>
+          <a href="/assessments" className="text-gray-700">Assessments</a>
+          <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
+          <a href="#" className="text-gray-700">Blog</a>  
+        </nav>
+        <Link to="/profile">
+          <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer">
+              <img
+                src={profilePic}
+                alt="Profile"
+                className="w-10 h-10 rounded-full object-cover shadow-md"
+              />
+          </div>
+        </Link>
+      </header>
 
       {/* Hero Section */}
-      <header className="p-8 text-left">
-        <h2 className="text-green-600 text-2xl font-semibold">Insights from our team</h2>
+      <main className="container mx-auto p-8">
+        <h2 className="text-xl font-semibold text-green-700">Insights from our team</h2>
         <p className="text-gray-600">Advanced Assessment Tools and Features for Skill-Driven Learners</p>
         <input
           type="text"
           placeholder="🔍 Most in-demand skills..."
           className="mt-4 w-full max-w-md border p-2 rounded-lg"
         />
-      </header>
 
-      <div className="container mx-auto flex gap-8 p-8">
-        {/* Sidebar */}
-        <aside className="w-1/4 space-y-6">
-          <div>
-            <h3 className="font-semibold text-gray-700">Blog Topics</h3>
-            <ul className="space-y-2 text-gray-600">
-              <li>Company</li>
-              <li>Design</li>
-              <li>Technology</li>
-              <li>Crypto</li>
-              <li>Artificial Intelligence</li>
-              <li>Work</li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-700">Guide and Tools</h3>
-            <ul className="space-y-2 text-gray-600">
-              <li>Guidelines</li>
-              <li>Mentorship</li>
-              <li>Tutorial</li>
-              <li>Training</li>
-              <li>Career</li>
-              <li>Self Care</li>
-            </ul>
-          </div>
-        </aside>
+        <div className="flex gap-8 mt-8">
+          {/* Sidebar */}
+          <aside className="w-1/4 space-y-6">
+            <div>
+              <h3 className="font-semibold text-gray-700">Blog Topics</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li>Company</li>
+                <li>Design</li>
+                <li>Technology</li>
+                <li>Crypto</li>
+                <li>Artificial Intelligence</li>
+                <li>Work</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-700">Guide and Tools</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li>Guidelines</li>
+                <li>Mentorship</li>
+                <li>Tutorial</li>
+                <li>Training</li>
+                <li>Career</li>
+                <li>Self Care</li>
+              </ul>
+            </div>
+          </aside>
 
-        {/* Blog Section */}
-        <main className="w-3/4">
-          {[1, 2, 3].map((item) => (
-            <article key={item} className="flex gap-4 mb-8 bg-white p-4 rounded-lg shadow">
-              <div className="w-1/4 bg-green-500 h-32 rounded-lg"></div>
-              <div className="w-3/4">
-                <p className="text-green-600">Mar 1</p>
-                <h3 className="text-xl font-bold">Advanced Skill Assessment Tools and Features for Ambitious Learners</h3>
-                <p className="text-gray-600 text-sm">I’m always exploring new and innovative ways to enhance learning experiences...</p>
-                <div className="flex items-center mt-2 text-sm text-gray-500">
-                  <span className="px-2 py-1 bg-gray-200 rounded">Tools</span>
-                  <span className="ml-4">By Anissa Tegawe</span>
-                  <span className="ml-4 text-green-600">● 7 min read</span>
+          {/* Blog Section */}
+          <section className="w-3/4">
+            {[1, 2, 3].map((item) => (
+              <article key={item} className="flex gap-4 mb-8 bg-white p-4 rounded-lg shadow">
+                <div className="w-1/4 bg-green-500 h-32 rounded-lg">
+                <img
+                  src={blogPic}
+                  alt="Profile"
+                  className="w-500 h-32 rounded-lg object-cover shadow-md"
+                  />
                 </div>
-              </div>
-            </article>
-          ))}
-          <button className="bg-green-600 text-white py-2 px-4 rounded-lg">See More</button>
-        </main>
-      </div>
+                <div className="w-3/4">
+                  <p className="text-green-600">Mar 1</p>
+                  <h3 className="text-xl font-bold">Advanced Skill Assessment Tools and Features for Ambitious Learners</h3>
+                  <p className="text-gray-600 text-sm">I’m always exploring new and innovative ways to enhance learning experiences...</p>
+                  <div className="flex items-center mt-2 text-sm text-gray-500">
+                    <span className="px-2 py-1 bg-gray-200 rounded">Tools</span>
+                    <span className="ml-4">By Anissa Tegawe</span>
+                    <span className="ml-4 text-green-600">● 7 min read</span>
+                  </div>
+                </div>
+              </article>
+            ))}
+            <button className="bg-green-600 text-white py-2 px-4 rounded-lg">See More</button>
+          </section>
+        </div>
+      </main>
 
       {/* Newsletter */}
       <section className="bg-green-100 p-8 text-center">
@@ -85,9 +103,9 @@ const BlogLandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="text-center p-4 bg-gray-200 text-gray-600">
-        <h2 className="text-green-600 font-bold">SkillsAssess</h2>
-        <p className="text-xs">© 2023 Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+      <footer className="bg-gray-100 text-center p-8 mt-12 rounded-lg">
+        <h1 className="text-green-700 font-bold">SkillsAssess</h1>
+        <p className="text-sm text-gray-600">&copy; 2023 Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
       </footer>
     </div>
   );
