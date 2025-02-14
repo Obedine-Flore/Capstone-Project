@@ -90,40 +90,34 @@ Link:https://www.figma.com/design/kop3vnP1GSGure8CmyM3TV/SkillsAssess?node-id=0-
 ![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssess_System%20Architecture.drawio.png)
 
 ## Deployment Plan
-
 ### Backend Deployment
+The Node.js backend will be deployed using the Heroku cloud platform.
 
-I would use the Heroku cloud platform to deploy the Node.js backend.
+A MySQL database will be set up on Amazon RDS, DigitalOcean Managed Databases, or another cloud provider.
 
-I would set up a MySQL database on Amazon RDS, DigitalOcean Managed Databases, or another cloud provider.
+PM2 will be configured to keep the backend running efficiently.
 
-I would configure PM2 to keep the backend running.
-
-I would use Nginx or as a reverse proxy to manage API requests.
+Nginx will be used as a reverse proxy to manage API requests.
 
 ### Frontend Deployment
+The React application will be deployed using Netlify.
 
-I would deploy the React application using Netlify.
-
-Ensuring the frontend communicates with the deployed backend via the correct API endpoints.
+Proper configuration will ensure that the frontend communicates seamlessly with the deployed backend via the correct API endpoints.
 
 ### Database Deployment
+The database will be deployed using Amazon RDS, DigitalOcean Managed Databases, or a self-hosted MySQL instance.
 
-Use Amazon RDS, DigitalOcean Managed Databases, or a self-hosted MySQL instance.
+Security measures, including authentication and access control, will be implemented to protect the database.
 
-Secure the database with proper authentication and access control.
-
-Implement database backups and monitoring tools.
+Database backups and monitoring tools will be set up to ensure reliability and data integrity.
 
 ### Environment Variables
-
-Store secrets securely using dotenv files (.env), AWS Secrets Manager, or environment variables on the cloud platform.
+Sensitive information will be securely stored using dotenv files (.env), AWS Secrets Manager, or environment variables on the cloud platform.
 
 ### Continuous Deployment (CI/CD)
+GitHub Actions, Jenkins, or Travis CI will be used to automate deployments.
 
-Use GitHub Actions, Jenkins, or Travis CI to automate deployments.
-
-Set up automatic deployments on push to main or a designated deployment branch.
+Automatic deployments will be set up to trigger on push to the main branch or a designated deployment branch.
 
 ## Video Demo
 
