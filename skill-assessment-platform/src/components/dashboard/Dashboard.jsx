@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import '../../index.css';
 import { Link } from 'react-router-dom';
 import profilePic from "../../assets/profile.jpg";
@@ -12,6 +12,22 @@ const Dashboard = () => {
     { name: "Problem Solving", proficiency: 25 },
     { name: "Team Work", proficiency: 90 },
   ];
+
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    // Retrieve the name from localStorage (or state if you prefer)
+    const storedName = localStorage.getItem('user');
+    if (storedName) {
+        try {
+          const userData = JSON.parse(storedName);
+          setUserName(userData.name || 'Guest');
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          setUserName('Guest');
+        }
+      }
+    }, []);
 
   return (
     <div className="min-h-screen flex flex-col justify-between px-8 py-6">
@@ -37,7 +53,7 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto p-8">
-        <h2 className="text-xl font-semibold">Hello Marry,</h2>
+        <h2 className="text-xl font-semibold">Hello {userName || 'Guest'},</h2>
         <p className="text-lg text-green-700 font-semibold">What skill will you like to practice today?</p>
 
         {/* Search Bar */}

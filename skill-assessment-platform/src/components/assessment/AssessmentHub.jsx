@@ -1,30 +1,35 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import profilePic from "../../assets/profile.jpg";
 
 const Assessment = () => {
   const navigate = useNavigate();
+  const [assessments, setAssessments] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/assessments/all') // Ensure this matches your backend API route
+      .then(response => response.json())
+      .then(data => setAssessments(data))
+      .catch(error => console.error('Error fetching assessments:', error));
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col justify-between px-8 py-6">
       {/* Navbar */}
       <header className="flex justify-between items-center p-6 shadow-md bg-white rounded-lg">
         <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
-          <nav className="space-x-6">
-            <a href="/dashboard" className="text-gray-700">Dashboard</a>
-            <a href="#" className="text-green-700 font-semibold">Assessments</a>
-            <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
-            <a href="/blog" className="text-gray-700">Blog</a>  
-          </nav>
-          <Link to="/profile">
-            <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer">
-              <img
-              src={profilePic}
-              alt="Profile"
-              className="w-10 h-10 rounded-full object-cover shadow-md"
-              />
-            </div>
-          </Link>
+        <nav className="space-x-6">
+          <a href="/dashboard" className="text-gray-700">Dashboard</a>
+          <a href="#" className="text-green-700 font-semibold">Assessments</a>
+          <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
+          <a href="/blog" className="text-gray-700">Blog</a>  
+        </nav>
+        <Link to="/profile">
+          <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer">
+            <img src={profilePic} alt="Profile" className="w-10 h-10 rounded-full object-cover shadow-md" />
+          </div>
+        </Link>
       </header>
 
       {/* Main Content */}
@@ -35,19 +40,28 @@ const Assessment = () => {
         <div className="mt-8 bg-white p-8 shadow rounded-lg">
           <h3 className="font-semibold text-gray-700">Available Assessments</h3>
           <div className="grid grid-cols-3 gap-8 mt-6">
-            {[1, 2, 3].map((_, index) => (
-              <div key={index} className="border p-6 rounded-lg shadow-md">
-                <h4 className="text-lg font-semibold text-gray-800">Communication Assessment</h4>
-                <p className="font-bold">Communication</p>
-                <ul className="text-gray-600 text-sm mt-3">
-                  <li>Intermediate</li>
-                  <li>⏳ 45 minutes</li>
-                  <li>📝 20 Questions</li>
-                  <li>🔄 Can be attempted once</li>
-                </ul>
-                <button onClick={() => navigate("/assessments/QuestionScreen")} className="mt-6 bg-green-600 text-white px-5 py-3 rounded">Start Assessment</button>
-              </div>
-            ))}
+            {assessments.length > 0 ? (
+              assessments.map((assessment) => (
+                <div key={assessment.id} className="border p-6 rounded-lg shadow-md">
+                  <h4 className="text-lg font-semibold text-gray-800">{assessment.title}</h4>
+                  <p className="font-bold">{assessment.description}</p>
+                  <ul className="text-gray-600 text-sm mt-3">
+                    <li>Level: {assessment.level}</li>
+                    <li>⏳ {assessment.time} minutes</li>
+                    <li>📝 {assessment.num_questions} Questions</li>
+                    <li>🔄 {assessment.attempts_allowed} Can be attempted multiple times</li>
+                  </ul>
+                  <button 
+                    onClick={() => navigate(`/assessments/${assessment.id}/questions`)}
+                    className="mt-6 bg-green-600 text-white px-5 py-3 rounded"
+                  >
+                    Start Assessment
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No assessments available</p>
+            )}
           </div>
         </div>
 

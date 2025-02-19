@@ -10,6 +10,7 @@ import ContactUs from "./components/landing/ContactUs";
 import AboutUs from "./components/landing/AboutUs";
 import SignIn from "./components/landing/SignIn";
 import SignUp from "./components/landing/SignUp";
+import EditProfile from "./components/Profile/EditProfile";
 
 const App = () => {
   return (
@@ -20,11 +21,12 @@ const App = () => {
           <Route path="/SignUp" element={<SignUp />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/assessments" element={<AssessmentHub />} />
-          <Route path="/assessments/QuestionScreen" element={<QuestionScreen />} />
+          <Route path="/assessments/:assessmentId/questions" element={<QuestionScreen />} />
           <Route path="/assessments/AssessmentReport" element={<AssessmentReport />} />
           <Route path="/ContactUs" element={<ContactUs />} />
           <Route path="/AboutUs" element={<AboutUs />} />
           <Route path="/Profile" element={<ProfileSection />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/blog" element={<BlogLandingPage />} />
           {/* Add other routes if needed */}
         </Routes>

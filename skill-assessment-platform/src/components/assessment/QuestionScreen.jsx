@@ -1,26 +1,26 @@
-// src/components/assessment/QuestionScreen.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 const QuestionScreen = () => {
+  const { assessmentId } = useParams(); // Get the assessment ID from the URL
+  const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
-
-  const questions = [
-    {
-      id: 1,
-      type: 'multiple-choice',
-      question: 'Which approach would be most effective for resolving a conflict within a team?',
-      options: [
-        'Immediately escalate to management',
-        'Ignore the conflict to maintain harmony',
-        'Facilitate a discussion between involved parties',
-        'Make a unilateral decision'
-      ],
-      skill: 'Communication'
-    }
-    // Add more questions here
-  ];
-
+  
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/assessments/${assessmentId}/questions`)
+      .then(response => response.json())
+      .then(data => {
+        console.log("Fetched Questions:", data); // Check what is returned
+        setQuestions(data || []); // Ensure it's an array
+      })
+      .catch(error => console.error("Error fetching questions:", error));
+  }, [assessmentId]);
+  
+  if (questions.length === 0) {
+    return <div className="text-center p-8">Loading questions...</div>;
+  }
+  
   return (
     <div className="max-w-3xl mx-auto p-6">
       {/* Progress Bar */}
@@ -36,45 +36,44 @@ const QuestionScreen = () => {
           />
         </div>
       </div>
-
+      
       {/* Question */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="mb-2 text-md font-medium text-green-600">
-          {questions[currentQuestion].skill}
+      <div className="mb-8">
+        <div className="text-sm text-gray-500 mb-2">
+          {questions[currentQuestion].type ? questions[currentQuestion].type.toUpperCase() : 'MULTIPLE-CHOICE'}
         </div>
-        <h2 className="text-lg font-medium mb-6">
-          {questions[currentQuestion].question}
-        </h2>
-
-        {/* Options */}
-        <div className="space-y-3">
-          {questions[currentQuestion].options.map((option, index) => (
-            <button
-              key={index}
-              onClick={() => setSelectedAnswer(index)}
-              className={`w-full text-left p-4 rounded-lg border ${
-                selectedAnswer === index
-                  ? 'border-green-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
+        <h2 className="text-xl font-semibold mb-4">{questions[currentQuestion].question_text}</h2>
       </div>
-
+      
+      {/* Options */}
+      <div className="space-y-3 mb-8">
+        {questions[currentQuestion].options.map((option, index) => (
+          <button
+            key={index}
+            onClick={() => setSelectedAnswer(index)}
+            className={`w-full text-left p-4 rounded-lg border ${
+              selectedAnswer === index
+                ? "border-green-500 bg-blue-50"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+      
       {/* Navigation */}
       <div className="flex justify-between">
         <button
-          disabled={currentQuestion === 0}
           onClick={() => setCurrentQuestion(prev => prev - 1)}
+          disabled={currentQuestion === 0}
           className="px-6 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-50"
         >
           Previous
         </button>
         <button
           onClick={() => setCurrentQuestion(prev => prev + 1)}
+          disabled={currentQuestion >= questions.length - 1}
           className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
         >
           Next
