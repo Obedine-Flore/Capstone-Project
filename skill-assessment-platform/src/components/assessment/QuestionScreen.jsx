@@ -37,6 +37,7 @@ const QuestionScreen = () => {
         </div>
       </div>
       
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       {/* Question */}
       <div className="mb-8">
         <div className="text-sm text-gray-500 mb-2">
@@ -79,6 +80,7 @@ const QuestionScreen = () => {
           Next
         </button>
       </div>
+    </div>
     </div>
   );
 };
