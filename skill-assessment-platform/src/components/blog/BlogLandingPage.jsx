@@ -1,9 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import profilePic from "../../assets/profile.jpg";
 import blogPic from "../../assets/blogimage.jpeg";
+import axios from "axios";
 
 const BlogLandingPage = () => {
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.log("No authentication token found, using default profile image");
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await axios.get("http://localhost:5000/api/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setUserData(response.data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col justify-between px-8 py-6">
       {/* Navbar */}
@@ -16,12 +48,26 @@ const BlogLandingPage = () => {
           <a href="#" className="text-gray-700">Blog</a>  
         </nav>
         <Link to="/profile">
-          <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer">
+          <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
+            {userData && userData.profile_picture ? (
               <img
-                src={profilePic}
+                src={userData.profile_picture.startsWith('http') 
+                  ? userData.profile_picture 
+                  : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
                 alt="Profile"
-                className="w-10 h-10 rounded-full object-cover shadow-md"
+                className="w-10 h-10 object-cover"
+                onError={(e) => {
+                  console.log("Profile image failed to load");
+                  e.target.src = profilePic;
+                }}
               />
+            ) : (
+              <img 
+                src={profilePic} 
+                alt="Profile" 
+                className="w-10 h-10 object-cover" 
+              />
+            )}
           </div>
         </Link>
       </header>
@@ -77,7 +123,7 @@ const BlogLandingPage = () => {
                 <div className="w-3/4">
                   <p className="text-green-600">Mar 1</p>
                   <h3 className="text-xl font-bold">Advanced Skill Assessment Tools and Features for Ambitious Learners</h3>
-                  <p className="text-gray-600 text-sm">I’m always exploring new and innovative ways to enhance learning experiences...</p>
+                  <p className="text-gray-600 text-sm">I'm always exploring new and innovative ways to enhance learning experiences...</p>
                   <div className="flex items-center mt-2 text-sm text-gray-500">
                     <span className="px-2 py-1 bg-gray-200 rounded">Tools</span>
                     <span className="ml-4">By Anissa Tegawe</span>

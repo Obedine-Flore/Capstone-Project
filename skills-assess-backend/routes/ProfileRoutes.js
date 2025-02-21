@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require("multer");
+const path = require("path");
 const mysql = require('mysql2/promise');
 
 // Create a MySQL connection pool
@@ -13,6 +15,39 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads/");
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${req.user.id}_${Date.now()}${path.extname(file.originalname)}`);
+    },
+  });
+  
+  const upload = multer({ storage });
+  
+  // Serve static files
+  router.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+  
+  // Upload profile picture
+  router.post("/api/profile/upload", upload.single("profilePicture"), async (req, res) => {
+    try {
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+  
+      const profilePicture = req.file.path.replace(/\\/g, "/"); // Normalize path
+  
+      await pool.query("UPDATE Users SET profile_picture = ? WHERE id = ?", [profilePicture, req.user.id]);
+  
+      res.json({ message: "Profile picture updated", profilePicture });
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  });
+
 // Get user profile
 router.get('/api/profile', async (req, res) => {
     try {
@@ -24,7 +59,7 @@ router.get('/api/profile', async (req, res) => {
         
         // Get user profile excluding sensitive information
         const [users] = await pool.query(
-            'SELECT id, name, email, bio, created_at FROM Users WHERE id = ?',
+            'SELECT id, name, email, bio, profile_picture, created_at FROM Users WHERE id = ?',
             [req.user.id]
         );
         
@@ -64,7 +99,7 @@ router.put('/api/profile/update', async (req, res) => {
             return res.status(401).json({ message: 'Authentication required' });
         }
         
-        const { name, email, bio, skills } = req.body;
+        const { name, email, bio, profile_picture, skills } = req.body;
 
         // Validate email format if provided
         if (email) {
@@ -94,6 +129,10 @@ router.put('/api/profile/update', async (req, res) => {
             if (bio) {
                 updateFields.push('bio = ?');
                 updateValues.push(bio);
+            }
+            if (profile_picture) {
+                updateFields.push('profile_picture = ?');
+                updateValues.push(profile_picture);
             }
 
             // Only update if there are fields to update
@@ -140,7 +179,7 @@ router.put('/api/profile/update', async (req, res) => {
             
             // Get the updated user profile
             const [users] = await connection.query(
-                'SELECT id, name, email, bio, created_at FROM Users WHERE id = ?',
+                'SELECT id, name, email, bio, profile_picture, created_at FROM Users WHERE id = ?',
                 [req.user.id]
             );
             

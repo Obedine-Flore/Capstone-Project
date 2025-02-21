@@ -135,13 +135,18 @@ const handleSubmitAssessment = async () => {
   
   return (
     <div className="max-w-3xl mx-auto p-6">
-      {/* Progress Bar */}
       <div className="flex justify-between mb-6">
         <span>Question {currentQuestion + 1} of {questions.length}</span>
         <span>Time Remaining: 15:00</span>
       </div>
+      <div className="w-full bg-gray-300 h-2 mb-6 rounded-2xl">
+        <div className="bg-green-600 h-2 rounded-2xl" style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}>
+        </div>
+      </div>
+
       
       {/* Question */}
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
       <div className="mb-8">
         <div className="text-sm text-gray-500 mb-2">
           {currentQuestionData.type ? currentQuestionData.type.toUpperCase() : 'MULTIPLE-CHOICE'}
@@ -182,6 +187,7 @@ const handleSubmitAssessment = async () => {
         >
           {isLastQuestion ? "Submit Assessment" : "Next"}
         </button>
+      </div>
       </div>
     </div>
   );

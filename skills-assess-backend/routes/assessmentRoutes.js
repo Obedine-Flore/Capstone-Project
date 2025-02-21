@@ -1,8 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Assessment = require('../models/AssessmentModel');
+const pool = require('../config/db');
+const { getAllAssessments } = require("../controllers/assessmentController");
 
-// Create a new assessment
+// 1. GET /api/assessments/all - Returns all available assessments
+
+router.get("/all", getAllAssessments);
+  
+  // Create a new assessment
 router.post('/create', async (req, res) => {
     const { title, description } = req.body;
     try {

@@ -1,35 +1,69 @@
-import React, { useState } from 'react';
-import axios from 'axios'; // Import Axios for making API calls
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from '../contexts/AuthContext';
 
 const SignIn = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  // API URL (Replace with your actual backend URL)
-  const API_URL = 'http://localhost:5000/auth/login';
+  const API_URL = "http://localhost:5000/auth/login";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
+    setError("");
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
+      const response = await axios.post(API_URL, { 
+        email, 
+        password 
+      });
 
-      const response = await axios.post(API_URL, { email, password });
-      console.log('Login successful:', response.data);
+      // Log the response for debugging
+      console.log('Server response:', response.data);
 
-      // Store token in localStorage or cookies (optional, depending on your app)
-      localStorage.setItem('authToken', response.data.token);
+      // Check if we have a response with data
+      if (response.data) {
+        // Extract user data first
+        const userData = response.data.user || response.data;
+        
+        // Get token
+        const token = response.data.token;
+        
+        // Then use the login function from your context
+        login(userData, token);
+        
+        // Navigate to dashboard
+        navigate("/dashboard");
+        
+        return; // Exit the function after successful login
+      }
 
-      // Redirect user to a protected page (e.g., dashboard)
-      window.location.href = '/dashboard';
-
+      // If we reach here, something went wrong
+      throw new Error("Invalid response format from server");
+      
     } catch (error) {
-      console.error('Error:', error);
-      setError(error.response?.data?.message || 'Failed to login');
+      console.error("Login error details:", error);
+      
+      // Handle different types of errors
+      if (error.response) {
+        // The server responded with a status code outside the 2xx range
+        setError(error.response.data.message || 
+                error.response.data.error || 
+                "Server error: " + error.response.status);
+      } else if (error.request) {
+        // The request was made but no response was received
+        setError("No response from server. Please check your connection.");
+      } else {
+        // Something happened in setting up the request
+        setError(error.message || "Failed to login. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -38,7 +72,9 @@ const SignIn = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold text-center mb-6 text-green-600">Sign In</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-green-600">
+          Sign In
+        </h2>
         {error && (
           <div className="mb-4 p-2 text-red-600 bg-red-50 rounded text-sm">
             {error}
@@ -82,7 +118,7 @@ const SignIn = () => {
             className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-300"
             disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? "Signing in..." : "Sign In"}
           </button>
           <div className="mt-4 text-center">
             <a href="#" className="text-green-600 hover:underline text-sm">
@@ -91,7 +127,7 @@ const SignIn = () => {
           </div>
           <div className="mt-4 text-center">
             <span className="text-gray-600 text-sm">
-              Don't have an account?{' '}
+              Don't have an account?{" "}
               <a href="/signup" className="text-green-600 hover:underline">
                 Sign Up
               </a>
