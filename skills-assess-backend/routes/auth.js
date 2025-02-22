@@ -2,6 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/UserModel');
+const jwtSecret = process.env.JWT_SECRET;
+const connection = require('../config/db');
 require('dotenv').config();
 
 const router = express.Router();
@@ -23,7 +25,14 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await User.createUser(name, email, hashedPassword);
 
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: 'User registered successfully',
+      token,
+      user: {
+        id: userId,
+        name,
+        email
+      }
+     });
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -55,7 +64,23 @@ router.post('/login', async (req, res) => {
           return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      res.json({ message: "Login successful" });
+      if (!jwtSecret) {
+        return res.status(500).json({ message: 'Server error: JWT_SECRET is not defined' });
+      }
+
+      // Create the token
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, jwtSecret, { expiresIn: '1h' });
+
+      //send the token
+      res.json({
+        message: "Login successful",
+        token: token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email
+        }
+      });
 
   } catch (error) {
       console.error("Error during login:", error);

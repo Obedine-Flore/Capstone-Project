@@ -91,54 +91,24 @@ router.get('/api/blog-posts/:id', async (req, res) => {
 
 // Subscribe to newsletter
 router.post('/api/newsletter/subscribe', async (req, res) => {
-    try {
-      const { email } = req.body;
-      
-      // Validate email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Invalid email address' });
-      }
-      
-      // Use a Promise wrapper if necessary
-      const query = (sql, params) => {
-        return new Promise((resolve, reject) => {
-          connection.query(sql, params, (error, results) => {
-            if (error) reject(error);
-            resolve(results);
-          });
-        });
-      };
-      
-      // Check if already subscribed
-      const checkResults = await query(
-        'SELECT * FROM newsletter_subscribers WHERE email = ?',
-        [email]
-      );
-      
-      if (checkResults.length > 0) {
-        if (checkResults[0].status === 'unsubscribed') {
-          // Re-subscribe
-          await query(
-            'UPDATE newsletter_subscribers SET status = ?, subscribed_at = CURRENT_TIMESTAMP WHERE email = ?',
-            ['active', email]
-          );
-          return res.status(200).json({ message: 'Successfully re-subscribed' });
-        }
-        return res.status(409).json({ message: 'Already subscribed' });
-      }
-      
-      // Add new subscriber
-      await query(
-        'INSERT INTO newsletter_subscribers (email) VALUES (?)',
-        [email]
-      );
-      
-      res.status(201).json({ message: 'Successfully subscribed' });
-    } catch (err) {
-      console.error('Error subscribing to newsletter:', err);
-      res.status(500).json({ error: 'Server error' });
+  const { email } = req.body;
+
+  // Check if the email is already subscribed
+  try {
+    const [existingEmail] = await connection.query('SELECT * FROM newsletter_subscribers WHERE email = ?', [email]);
+
+    if (existingEmail.length > 0) {
+      return res.status(409).json({ message: 'You are already subscribed!' });
     }
-  });
+
+    // Add the new email to the newsletter subscribers table
+    await connection.query('INSERT INTO newsletter_subscribers (email) VALUES (?)', [email]);
+
+    res.status(200).json({ message: 'Subscription successful!' });
+  } catch (err) {
+    console.error('Error subscribing to newsletter:', err);
+    res.status(500).json({ message: 'Subscription failed. Please try again later.' });
+  }
+});
 
 module.exports = router;

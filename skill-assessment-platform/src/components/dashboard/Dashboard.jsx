@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [blogPosts, setBlogPosts] = useState([]);
 
   useEffect(() => {
     // Retrieve the name from localStorage (or state if you prefer)
@@ -127,6 +128,26 @@ const Dashboard = () => {
         </div>
 
         <button className="mt-8 bg-green-600 text-white px-8 py-3 rounded">See More</button>
+        <div className="flex flex-col md:flex-row gap-8">         
+                    {/* Featured Article */}
+                    {blogPosts.find(post => post.featured) && (
+                      <div className="bg-green-50 border border-green-100 p-4 rounded-lg">
+                        <span className="text-xs font-medium text-green-800 bg-green-200 px-2 py-1 rounded-full">Featured</span>
+                        <h4 className="font-medium text-green-900 mt-2">
+                          {blogPosts.find(post => post.featured).title}
+                        </h4>
+                        <p className="text-sm text-green-700 mt-2">
+                          {blogPosts.find(post => post.featured).excerpt.substring(0, 70)}...
+                        </p>
+                        <Link 
+                          to={`/blog/${blogPosts.find(post => post.featured).id}`}
+                          className="text-sm font-medium text-green-700 hover:text-green-800 mt-2 inline-block"
+                        >
+                          Read more →
+                        </Link>
+                      </div>
+                    )}
+        </div>
       </main>
 
       {/* Footer */}

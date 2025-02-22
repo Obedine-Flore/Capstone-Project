@@ -11,9 +11,12 @@ import AboutUs from "./components/landing/AboutUs";
 import SignIn from "./components/landing/SignIn";
 import SignUp from "./components/landing/SignUp";
 import EditProfile from "./components/Profile/EditProfile";
+import { AuthProvider } from './components/contexts/AuthContext';
+import BlogPost from './components/blog/BlogPost';
 
 const App = () => {
   return (
+    <AuthProvider>
     <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -28,9 +31,11 @@ const App = () => {
           <Route path="/Profile" element={<ProfileSection />} />
           <Route path="/edit-profile" element={<EditProfile />} />
           <Route path="/blog" element={<BlogLandingPage />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
           {/* Add other routes if needed */}
         </Routes>
     </Router>
+    </AuthProvider>
   );
 };
 

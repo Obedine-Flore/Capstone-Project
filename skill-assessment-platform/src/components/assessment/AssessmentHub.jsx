@@ -14,21 +14,17 @@ const Assessment = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch user profile data
     fetchUserData();
     
     // Fetch available assessments
     fetch('http://localhost:5000/api/assessments/all')
-      .then(response => response.json())
-      .then(data => setAssessments(data))
-      .catch(error => console.error('Error fetching assessments:', error));
+        .then(response => response.json())
+        .then(data => setAssessments(data))
+        .catch(error => console.error('Error fetching assessments:', error));
     
-    // Fetch user assessment history
-    fetch('http://localhost:5000/api/user-assessments/history')
-      .then(response => response.json())
-      .then(data => setUserAssessments(data))
-      .catch(error => console.error('Error fetching assessment history:', error));
-  }, []);
+    // Use the new fetchAssessmentHistory function
+    fetchAssessmentHistory();
+}, []);
 
   const fetchUserData = async () => {
     try {
@@ -92,6 +88,40 @@ const Assessment = () => {
     };
     return new Date(dateString).toLocaleString(undefined, options);
   };
+
+// In AssessmentHub.jsx, modify fetchAssessmentHistory:
+const fetchAssessmentHistory = async () => {
+  try {
+      // Get the user ID from your auth token
+      const token = localStorage.getItem("token");
+      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT token
+      const userId = decodedToken.id; // Or however your user ID is stored in the token
+      
+      console.log('Fetching history for user:', userId); // Debug log
+      
+      const response = await axios.get(`http://localhost:5000/api/user-assessments/history?userId=${userId}`, {
+          headers: {
+              Authorization: `Bearer ${token}`
+          }
+      });
+      
+      console.log('Response data:', response.data); // Debug log
+      
+      if (response.data) {
+          const formattedData = response.data.map(assessment => ({
+              id: assessment.id,
+              title: assessment.title,
+              completion_date: assessment.completed_at,
+              score: assessment.score,
+              passed: assessment.score >= 70
+          }));
+          
+          setUserAssessments(formattedData);
+      }
+  } catch (error) {
+      console.error('Error fetching assessment history:', error);
+  }
+};
 
   return (
     <div className="min-h-screen flex flex-col justify-between px-8 py-6">

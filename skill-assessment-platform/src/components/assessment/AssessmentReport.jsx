@@ -1,37 +1,83 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Download, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import profilePic from "../../assets/profile.jpg";
 
 const AssessmentReport = () => {
-  const tableData = [
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Critical Thinking', status: 'None' },
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Adaptability', status: 'None' },
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Teamwork', status: 'None' },
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Communication', status: 'None' },
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Curiosity', status: 'None' },
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Creativity', status: 'None' },
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Research', status: 'None' },
-    { date: '2024-11-24 10:30 AM', grade: 'Low', skill: 'Problem-Solving', status: 'None' },
-  ];
+  const { id } = useParams(); // Get assessment ID from URL
+  const [reportData, setReportData] = useState({
+    assessmentDetails: {},
+    skillBreakdown: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  useEffect(() => {
+    // Fetch assessment report data
+    setLoading(true);
+    fetch(`http://localhost:5000/api/user-assessments/report/${id}`)
+      .then(response => response.json())
+      .then(data => {
+        setReportData(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching assessment report:', error);
+        setLoading(false);
+      });
+  }, [id]);
+
+  // Filter skill breakdown based on search term
+  const filteredSkills = reportData.skillBreakdown.filter(skill =>
+    skill.skillName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredSkills.length / itemsPerPage);
+  const currentItems = filteredSkills.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const options = { 
+      year: 'numeric', 
+      month: 'numeric', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleString(undefined, options);
+  };
+
+  // Determine grade text based on score
+  const getGradeText = (score) => {
+    if (score >= 80) return "High";
+    if (score >= 60) return "Medium";
+    return "Low";
+  };
 
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <header className="flex justify-between items-center p-6 shadow-md bg-white rounded-lg">
-      <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
+        <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
         <nav className="space-x-6">
           <a href="/dashboard" className="text-gray-700">Dashboard</a>
-          <a href="#" className="text-green-700 font-semibold">Assessments</a>
-          <a href="#" className="text-gray-700">Peer Reviews</a>
+          <Link to="/assessments" className="text-green-700 font-semibold">Assessments</Link>
+          <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
           <a href="/blog" className="text-gray-700">Blog</a>
         </nav>
         <Link to="/profile">
           <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer">
             <img
-            src={profilePic}
-            alt="Profile"
-            className="w-10 h-10 rounded-full object-cover shadow-md"
+              src={profilePic}
+              alt="Profile"
+              className="w-10 h-10 rounded-full object-cover shadow-md"
             />
           </div>
         </Link>
@@ -39,86 +85,149 @@ const AssessmentReport = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-semibold text-green-600">Skills Assessment Report</h2>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <button className="flex items-center space-x-2 px-4 py-2 border rounded-md">
-                <span>Date Range</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
+        {loading ? (
+          <div className="text-center py-10">Loading assessment report...</div>
+        ) : (
+          <>
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-2xl font-semibold text-green-600">
+                  {reportData.assessmentDetails.title} Report
+                </h2>
+                <p className="text-gray-600 mt-1">
+                  Completed on: {formatDate(reportData.assessmentDetails.completion_date)}
+                </p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <button className="flex items-center space-x-2 px-4 py-2 border rounded-md">
+                    <span>Date: {formatDate(reportData.assessmentDetails.completion_date)}</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                </div>
+                <button className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center space-x-2">
+                  <span>Share Report</span>
+                </button>
+              </div>
             </div>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center space-x-2">
-              <span>Share Report</span>
-            </button>
-          </div>
-        </div>
 
-        {/* Stats Card */}
-        <div className="bg-white shadow-sm rounded-lg p-6 mb-8 inline-block">
-          <div className="text-sm text-gray-500">Number of tests taken</div>
-          <div className="text-3xl font-bold text-green-600">1.200.000</div>
-        </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
+                <div className="text-sm text-gray-500">Overall Score</div>
+                <div className="text-3xl font-bold text-green-600">
+                  {reportData.assessmentDetails.score}%
+                </div>
+              </div>
+              <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
+                <div className="text-sm text-gray-500">Status</div>
+                <div className={`text-3xl font-bold ${reportData.assessmentDetails.passed ? "text-green-600" : "text-red-500"}`}>
+                  {reportData.assessmentDetails.passed ? "Pass" : "Fail"}
+                </div>
+              </div>
+              <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
+                <div className="text-sm text-gray-500">Time Taken</div>
+                <div className="text-3xl font-bold text-green-600">
+                  {reportData.assessmentDetails.time_taken || "N/A"} min
+                </div>
+              </div>
+            </div>
 
-        {/* Detailed Data Section */}
-        <div className="bg-white shadow-sm rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">Detailed Data</h3>
-          
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full px-4 py-2 border rounded-md pl-10"
-            />
-            <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-          </div>
+            {/* Detailed Data Section */}
+            <div className="bg-white shadow-sm rounded-lg p-6">
+              <h3 className="text-lg font-semibold mb-4">Skill Breakdown</h3>
+              
+              {/* Search Bar */}
+              <div className="relative mb-6">
+                <input
+                  type="text"
+                  placeholder="Search skills"
+                  className="w-full px-4 py-2 border rounded-md pl-10"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1); // Reset to first page when searching
+                  }}
+                />
+                <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+              </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4">Date & Time</th>
-                  <th className="text-left py-3 px-4">Grade</th>
-                  <th className="text-left py-3 px-4">Skill</th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-right py-3 px-4">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tableData.map((row, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="py-4 px-4">{row.date}</td>
-                    <td className="py-4 px-4">{row.grade}</td>
-                    <td className="py-4 px-4">{row.skill}</td>
-                    <td className="py-4 px-4 text-gray-500">{row.status}</td>
-                    <td className="py-4 px-4">
-                      <button className="flex items-center space-x-1 text-green-600 ml-auto">
-                        <span>Download Report</span>
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4">Date & Time</th>
+                      <th className="text-left py-3 px-4">Grade</th>
+                      <th className="text-left py-3 px-4">Skill</th>
+                      <th className="text-left py-3 px-4">Score</th>
+                      <th className="text-right py-3 px-4">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentItems.length > 0 ? (
+                      currentItems.map((skill, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="py-4 px-4">{formatDate(reportData.assessmentDetails.completion_date)}</td>
+                          <td className="py-4 px-4">{getGradeText(skill.score)}</td>
+                          <td className="py-4 px-4">{skill.skillName}</td>
+                          <td className="py-4 px-4">{skill.score}%</td>
+                          <td className="py-4 px-4">
+                            <button className="flex items-center space-x-1 text-green-600 ml-auto">
+                              <span>Download Report</span>
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="py-4 px-4 text-center text-gray-500">
+                          {searchTerm ? "No skills match your search" : "No skill data available"}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Pagination */}
-          <div className="flex items-center justify-center space-x-2 mt-6">
-            <button className="p-2 rounded-md hover:bg-gray-100">
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-md bg-green-600 text-white">1</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100">2</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100">3</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100">4</button>
-            <button className="p-2 rounded-md hover:bg-gray-100">
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center space-x-2 mt-6">
+                  <button 
+                    className="p-2 rounded-md hover:bg-gray-100"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  
+                  {[...Array(totalPages)].map((_, i) => (
+                    <button 
+                      key={i + 1}
+                      className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                        currentPage === i + 1 
+                          ? "bg-green-600 text-white" 
+                          : "hover:bg-gray-100"
+                      }`}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  
+                  <button 
+                    className="p-2 rounded-md hover:bg-gray-100"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </main>
 
       {/* Footer */}

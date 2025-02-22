@@ -32,4 +32,23 @@ class Assessment {
   }
 }
 
+// In AssessmentModel.js
+const getAssessmentsByUserId = async (userId) => {
+  try {
+      const query = `
+          SELECT * 
+          FROM assessments 
+          WHERE user_id = ? 
+          ORDER BY completed_at DESC
+      `;
+      const [rows] = await pool.query(query, [userId]);
+      return rows;
+  } catch (error) {
+      console.error('Error fetching assessments:', error);
+      throw new Error('Error fetching assessments');
+  }
+};
+
+module.exports = { Assessment, getAssessmentsByUserId };
+
 module.exports = Assessment;

@@ -47,7 +47,6 @@ const QuestionScreen = () => {
 
   const calculateScore = () => {
     let correctCount = 0;
-    
     questions.forEach(question => {
       const selectedIndex = selectedAnswers[question.id];
       if (selectedIndex !== undefined) {
@@ -58,10 +57,12 @@ const QuestionScreen = () => {
       }
     });
     
+    const percentage = Math.round((correctCount / questions.length) * 100);
+    
+    // Return only what we need
     return {
-      score: correctCount,
-      total: questions.length,
-      percentage: Math.round((correctCount / questions.length) * 100)
+      percentage: percentage,
+      total_questions: questions.length
     };
   };
 
@@ -75,29 +76,29 @@ const handleSubmitAssessment = async () => {
       setIsSubmitting(false);
       return;
     }
-    
-    // ✅ Calculate score before using it
+
+    // Calculate score including percentage
     const result = calculateScore();
-    setScore(result); 
-    
+    setScore(result);
+
     const response = await fetch(`http://localhost:5000/api/assessments/${assessmentId}/submit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}` // If using JWT auth
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
       body: JSON.stringify({
-        userId: user.id, 
+        userId: user.id,
         assessmentId: parseInt(assessmentId),
-        score: result.score,  // ✅ Now result is defined
-        total: result.total
+        score: result.percentage, // Send percentage instead of raw score
+        total_questions: result.total // Keeping total for reference
       })
     });
 
     const data = await response.json();
     console.log("Assessment submitted:", data);
 
-    setScore(result); // ✅ Set the score state
+    setScore(result);
     setIsSubmitting(false);
   } catch (error) {
     console.error("Error submitting assessment:", error);
