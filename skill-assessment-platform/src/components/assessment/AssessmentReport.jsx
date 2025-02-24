@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Search, Download, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import profilePic from "../../assets/profile.jpg";
+import axios from 'axios';
 
 const AssessmentReport = () => {
-  const { id } = useParams();
+  const { id, userId } = useParams();
   const [reportData, setReportData] = useState({
     assessmentDetails: {
       title: '',
@@ -14,6 +15,7 @@ const AssessmentReport = () => {
       time_taken: 'N/A'
     }
   });
+  const [assessmentHistory, setAssessmentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,14 +23,13 @@ const AssessmentReport = () => {
   const [userData, setUserData] = useState(null);
   const itemsPerPage = 8;
 
-
   useEffect(() => {
     // Fetch assessment report data
     setLoading(true);
     fetch(`http://localhost:5000/api/assessment-report/${id}`)
       .then(response => response.json())
       .then(data => {
-        console.log("Raw API response:", data); // Add this to see the data structure
+        console.log("Raw API response:", data);
         
         // Transform the API response to match your component's expected structure
         const transformedData = {
@@ -46,25 +47,26 @@ const AssessmentReport = () => {
         };
         
         setReportData(transformedData);
+        
+        // After getting report data, fetch user assessment history
+        return fetch(`http://localhost:5000/api/user-assessments/history?userId=${userId}`);
+      })
+      .then(response => response.json())
+      .then(historyData => {
+        console.log("Assessment history:", historyData);
+        setAssessmentHistory(historyData);
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching assessment report:', error);
+        console.error('Error fetching data:', error);
         setLoading(false);
+        setError(error.message);
       });
   }, [id]);
-  
-  // Safe filtering of skills
-  const filteredSkills = reportData?.skillBreakdown?.filter(skill =>
-    skill.skillName.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
 
-  // Calculate pagination
-  const totalPages = Math.ceil(filteredSkills.length / itemsPerPage);
-  const currentItems = filteredSkills.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Safe filtering of assessment history
+
+
 
   // Format date
   const formatDate = (dateString) => {
@@ -86,6 +88,48 @@ const AssessmentReport = () => {
     return "Low";
   };
 
+  const fetchAssessmentHistory = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const decodedToken = JSON.parse(atob(token.split('.')[1]));
+      const userId = decodedToken.id;
+      
+      
+      // Modified query to include assessment_reports.id
+      const response = await axios.get(
+        `http://localhost:5000/api/user-assessments/history?userId=${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      
+      
+      if (response.data) {
+        const formattedData = response.data.map(assessment => ({
+          id: assessment.id, // user_assessment id
+          reportId: assessment.report_id, // assessment_report id
+          title: assessment.title,
+          completion_date: assessment.completed_at,
+          score: assessment.score,
+          passed: assessment.score >= 70
+        }));
+        
+        setAssessmentHistory(formattedData);
+      }
+    } catch (error) {
+      console.error('Error fetching assessment history:', error);
+    }
+  };
+
+  useEffect(() => {
+      fetchAssessmentHistory()
+  },[id])
+
+  console.log(assessmentHistory, "From the godamn screen")
+
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -97,7 +141,7 @@ const AssessmentReport = () => {
           <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
           <a href="/blog" className="text-gray-700">Blog</a>
         </nav>
-                <Link to="/profile">
+        <Link to="/profile">
                   <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
                     {userData && userData.profile_picture ? (
                       <img
@@ -119,13 +163,15 @@ const AssessmentReport = () => {
                       />
                     )}
                   </div>
-                </Link>
+        </Link>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="text-center py-10">Loading assessment report...</div>
+        ) : error ? (
+          <div className="text-center py-10 text-red-500">Error: {error}</div>
         ) : (
           <>
             <div className="flex justify-between items-center mb-8">
@@ -174,13 +220,13 @@ const AssessmentReport = () => {
 
             {/* Detailed Data Section */}
             <div className="bg-white shadow-sm rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Skill Breakdown</h3>
+              <h3 className="text-lg font-semibold mb-4">Assessment History</h3>
               
               {/* Search Bar */}
               <div className="relative mb-6">
                 <input
                   type="text"
-                  placeholder="Search skills"
+                  placeholder="Search assessments"
                   className="w-full px-4 py-2 border rounded-md pl-10"
                   value={searchTerm}
                   onChange={(e) => {
@@ -196,74 +242,44 @@ const AssessmentReport = () => {
                 <table className="min-w-full">
                   <thead>
                     <tr className="border-b">
+                      <th className="text-left py-3 px-4">ID</th>
                       <th className="text-left py-3 px-4">Date & Time</th>
-                      <th className="text-left py-3 px-4">Grade</th>
-                      <th className="text-left py-3 px-4">Skill</th>
+                      <th className="text-left py-3 px-4">Assessment ID</th>
                       <th className="text-left py-3 px-4">Score</th>
+                      <th className="text-left py-3 px-4">Grade</th>
                       <th className="text-right py-3 px-4">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {currentItems.length > 0 ? (
-                      currentItems.map((skill, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="py-4 px-4">{formatDate(reportData.assessmentDetails.completion_date)}</td>
-                          <td className="py-4 px-4">{getGradeText(skill.score)}</td>
-                          <td className="py-4 px-4">{skill.skillName}</td>
-                          <td className="py-4 px-4">{skill.score}%</td>
+                    {assessmentHistory.length > 0 ? (
+                      assessmentHistory.map((assessment,index) => (
+                        <tr key={assessment.id} className="border-b">
+                          <td className="py-4 px-4">{index + 1}</td>
+                          <td className="py-4 px-4">{formatDate(assessment.completed_at)}</td>
+                          <td className="py-4 px-4">{assessment.assessment_id}</td>
+                          <td className="py-4 px-4">{assessment.score}%</td>
+                          <td className="py-4 px-4">{getGradeText(assessment.score)}</td>
                           <td className="py-4 px-4">
-                            <button className="flex items-center space-x-1 text-green-600 ml-auto">
-                              <span>Download Report</span>
+                            <Link 
+                              to={`/assessment-report/${assessment.assessment_id}`}
+                              className="flex items-center space-x-1 text-green-600 ml-auto"
+                            >
+                              <span>View Report</span>
                               <Download className="w-4 h-4" />
-                            </button>
+                            </Link>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="5" className="py-4 px-4 text-center text-gray-500">
-                          {searchTerm ? "No skills match your search" : "No skill data available"}
+                        <td colSpan="6" className="py-4 px-4 text-center text-gray-500">
+                          {searchTerm ? "No assessments match your search" : "No assessment history available"}
                         </td>
                       </tr>
                     )}
                   </tbody>
                 </table>
               </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center space-x-2 mt-6">
-                  <button 
-                    className="p-2 rounded-md hover:bg-gray-100"
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  
-                  {[...Array(totalPages)].map((_, i) => (
-                    <button 
-                      key={i + 1}
-                      className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                        currentPage === i + 1 
-                          ? "bg-green-600 text-white" 
-                          : "hover:bg-gray-100"
-                      }`}
-                      onClick={() => setCurrentPage(i + 1)}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                  
-                  <button 
-                    className="p-2 rounded-md hover:bg-gray-100"
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
             </div>
           </>
         )}

@@ -148,7 +148,7 @@ app.get('/api/assessment-report/:id', async (req, res) => {
 app.get('/api/assessment-history/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await connection.query('SELECT DISTINCT completed_at FROM assessments WHERE student_id = ? ORDER BY completed_at DESC', [id]);
+    const result = await connection.query('SELECT DISTINCT completed_at FROM user_assessments WHERE user_id = ? ORDER BY completed_at DESC', [id]);
     res.json(result.map(item => item.completed_at));
   } catch (error) {
     console.error('Error fetching assessment history:', error);

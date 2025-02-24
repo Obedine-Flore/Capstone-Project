@@ -59,17 +59,34 @@ router.post('/:id/add-question', async (req, res) => {
 });
 
 // Get user assessment history
-router.get('/user-assessments/history', async (req, res) => {
-    const userId = req.params.userId; // Or use req.userId if using authentication middleware
-
+router.get('/api/user-assessment-history', async (req, res) => {
     try {
-        const assessments = await getAssessmentsByUserId(userId);
-        res.json(assessments);
+      const userId = req.user.id; // Assuming auth middleware adds user info
+      
+      const query = `
+        SELECT 
+          ua.id,
+          ua.user_id,
+          ua.assessment_id,
+          ua.score,
+          ua.completed_at,
+          a.title
+        FROM user_assessments ua
+        LEFT JOIN assessments a ON ua.assessment_id = a.id
+        WHERE ua.user_id = ?
+        ORDER BY ua.completed_at DESC
+      `;
+  
+      const connection = await pool.getConnection();
+      const [assessments] = await connection.query(query, [userId]);
+      connection.release();
+  
+      res.json(assessments);
     } catch (error) {
-        console.error('Error fetching assessment history:', error);
-        res.status(500).json({ message: 'Error fetching assessment history' });
+      console.error('Error fetching assessment history:', error);
+      res.status(500).json({ message: 'Error fetching assessment history' });
     }
-});
+  });
 
 router.post('/:assessmentId/submit', async (req, res) => {
     const { assessmentId } = req.params;
