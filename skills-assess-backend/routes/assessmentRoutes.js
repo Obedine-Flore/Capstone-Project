@@ -3,6 +3,7 @@ const router = express.Router();
 const Assessment = require('../models/AssessmentModel');
 const pool = require('../config/db');
 const { getAllAssessments } = require("../controllers/assessmentController");
+const { generateAndStoreAssessmentReport } = require('../controllers/assessmentReportController');
 
 // 1. GET /api/assessments/all - Returns all available assessments
 
@@ -57,32 +58,6 @@ router.post('/:id/add-question', async (req, res) => {
     }
 });
 
-router.get('/history', async (req, res) => {
-    const userId = req.query.userId; // Changed from req.params to req.query
-    
-    try {
-        const query = `
-            SELECT 
-                ua.id,
-                ua.user_id,
-                ua.assessment_id,
-                ua.score,
-                ua.completed_at,
-                a.title
-            FROM user_assessments ua
-            JOIN assessments a ON ua.assessment_id = a.id
-            WHERE ua.user_id = $1
-            ORDER BY ua.completed_at DESC
-        `;
-        
-        const result = await pool.query(query, [userId]);
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching assessment history:', error);
-        res.status(500).json({ message: 'Error fetching assessment history' });
-    }
-});
-
 // Get user assessment history
 router.get('/user-assessments/history', async (req, res) => {
     const userId = req.params.userId; // Or use req.userId if using authentication middleware
@@ -93,6 +68,39 @@ router.get('/user-assessments/history', async (req, res) => {
     } catch (error) {
         console.error('Error fetching assessment history:', error);
         res.status(500).json({ message: 'Error fetching assessment history' });
+    }
+});
+
+router.post('/:assessmentId/submit', async (req, res) => {
+    const { assessmentId } = req.params;
+    const { userId, score } = req.body;
+    const completedAt = new Date();
+  
+    try {
+      // Step 1: Insert assessment result
+      const insertAssessmentQuery = `
+        INSERT INTO user_assessments (user_id, assessment_id, score, completed_at) 
+        VALUES (?, ?, ?, ?)
+      `;
+  
+      const [results] = await pool.query(insertAssessmentQuery, [userId, assessmentId, score, completedAt]);
+      const userAssessmentId = results.insertId;
+  
+      // Step 2: Generate and store report
+      const reportResult = await generateAndStoreAssessmentReport(userAssessmentId);
+  
+      res.json({
+        success: true,
+        message: 'Assessment submitted and report generated successfully',
+        assessmentId,
+        score,
+        userAssessmentId,
+        reportId: reportResult.reportId
+      });
+  
+    } catch (error) {
+      console.error('Error in assessment submission:', error);
+      res.status(500).json({ error: 'Failed to submit assessment and generate report' });
     }
 });
 

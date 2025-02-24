@@ -4,23 +4,48 @@ import { Link, useParams } from 'react-router-dom';
 import profilePic from "../../assets/profile.jpg";
 
 const AssessmentReport = () => {
-  const { id } = useParams(); // Get assessment ID from URL
+  const { id } = useParams();
   const [reportData, setReportData] = useState({
-    assessmentDetails: {},
-    skillBreakdown: []
+    assessmentDetails: {
+      title: '',
+      completion_date: null,
+      score: 0,
+      passed: false,
+      time_taken: 'N/A'
+    }
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [userData, setUserData] = useState(null);
   const itemsPerPage = 8;
+
 
   useEffect(() => {
     // Fetch assessment report data
     setLoading(true);
-    fetch(`http://localhost:5000/api/user-assessments/report/${id}`)
+    fetch(`http://localhost:5000/api/assessment-report/${id}`)
       .then(response => response.json())
       .then(data => {
-        setReportData(data);
+        console.log("Raw API response:", data); // Add this to see the data structure
+        
+        // Transform the API response to match your component's expected structure
+        const transformedData = {
+          assessmentDetails: {
+            title: data[0]?.title || '',
+            completion_date: data[0]?.completed_at || null,
+            score: data[0]?.score || 0,
+            passed: (data[0]?.score || 0) >= 70,
+            time_taken: data[0]?.time_taken || 0
+          },
+          skillBreakdown: data.map(item => ({
+            skillName: item.skill_name || 'Unknown Skill',
+            score: item.skill_score || 0,
+          }))
+        };
+        
+        setReportData(transformedData);
         setLoading(false);
       })
       .catch(error => {
@@ -28,11 +53,11 @@ const AssessmentReport = () => {
         setLoading(false);
       });
   }, [id]);
-
-  // Filter skill breakdown based on search term
-  const filteredSkills = reportData.skillBreakdown.filter(skill =>
+  
+  // Safe filtering of skills
+  const filteredSkills = reportData?.skillBreakdown?.filter(skill =>
     skill.skillName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) || [];
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredSkills.length / itemsPerPage);
@@ -72,15 +97,29 @@ const AssessmentReport = () => {
           <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
           <a href="/blog" className="text-gray-700">Blog</a>
         </nav>
-        <Link to="/profile">
-          <div className="w-10 h-10 rounded-full bg-green-300 cursor-pointer">
-            <img
-              src={profilePic}
-              alt="Profile"
-              className="w-10 h-10 rounded-full object-cover shadow-md"
-            />
-          </div>
-        </Link>
+                <Link to="/profile">
+                  <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
+                    {userData && userData.profile_picture ? (
+                      <img
+                        src={userData.profile_picture.startsWith('http') 
+                          ? userData.profile_picture 
+                          : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
+                        alt="Profile"
+                        className="w-10 h-10 object-cover"
+                        onError={(e) => {
+                          console.log("Profile image failed to load");
+                          e.target.src = profilePic;
+                        }}
+                      />
+                    ) : (
+                      <img 
+                        src={profilePic} 
+                        alt="Profile" 
+                        className="w-10 h-10 object-cover" 
+                      />
+                    )}
+                  </div>
+                </Link>
       </header>
 
       {/* Main Content */}
@@ -106,7 +145,7 @@ const AssessmentReport = () => {
                   </button>
                 </div>
                 <button className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center space-x-2">
-                  <span>Share Report</span>
+                  <span>Download Report</span>
                 </button>
               </div>
             </div>

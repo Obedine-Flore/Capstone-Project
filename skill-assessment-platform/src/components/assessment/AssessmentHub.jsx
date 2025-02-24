@@ -92,34 +92,38 @@ const Assessment = () => {
 // In AssessmentHub.jsx, modify fetchAssessmentHistory:
 const fetchAssessmentHistory = async () => {
   try {
-      // Get the user ID from your auth token
-      const token = localStorage.getItem("token");
-      const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT token
-      const userId = decodedToken.id; // Or however your user ID is stored in the token
-      
-      console.log('Fetching history for user:', userId); // Debug log
-      
-      const response = await axios.get(`http://localhost:5000/api/user-assessments/history?userId=${userId}`, {
-          headers: {
-              Authorization: `Bearer ${token}`
-          }
-      });
-      
-      console.log('Response data:', response.data); // Debug log
-      
-      if (response.data) {
-          const formattedData = response.data.map(assessment => ({
-              id: assessment.id,
-              title: assessment.title,
-              completion_date: assessment.completed_at,
-              score: assessment.score,
-              passed: assessment.score >= 70
-          }));
-          
-          setUserAssessments(formattedData);
+    const token = localStorage.getItem("token");
+    const decodedToken = JSON.parse(atob(token.split('.')[1]));
+    const userId = decodedToken.id;
+    
+    console.log('Fetching history for user:', userId);
+    
+    // Modified query to include assessment_reports.id
+    const response = await axios.get(
+      `http://localhost:5000/api/user-assessments/history?userId=${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
+    );
+    
+    console.log('Response data:', response.data);
+    
+    if (response.data) {
+      const formattedData = response.data.map(assessment => ({
+        id: assessment.id, // user_assessment id
+        reportId: assessment.report_id, // assessment_report id
+        title: assessment.title,
+        completion_date: assessment.completed_at,
+        score: assessment.score,
+        passed: assessment.score >= 70
+      }));
+      
+      setUserAssessments(formattedData);
+    }
   } catch (error) {
-      console.error('Error fetching assessment history:', error);
+    console.error('Error fetching assessment history:', error);
   }
 };
 
@@ -229,10 +233,14 @@ const fetchAssessmentHistory = async () => {
                     {assessment.passed ? "Pass" : "Fail"}
                   </span>
                   <button 
-                    onClick={() => navigate(`/assessments/report/${assessment.id}`)} 
                     className="bg-green-600 text-white px-5 py-3 rounded"
                   >
-                    View details ▼
+                    <Link 
+                    to={`/assessment-report/${assessment.reportId || assessment.id}`} 
+                    className="bg-green-600 text-white px-4 py-2 rounded-md"
+                  >
+                  View Details ▼
+                   </Link>
                   </button>
                 </div>
               ))
