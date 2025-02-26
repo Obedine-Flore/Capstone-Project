@@ -1,10 +1,26 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Search, Download, ChevronDown } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import profilePic from "../../assets/profile.jpg";
 import axios from "axios";
+import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
 
 const AssessmentReport = () => {
+  const container = useRef(null);
+  const pdfExportComponent = useRef(null);
+  const exportPDFWithMethod = () => {
+    let el = container.current || document.body;
+    savePDF(el, {
+      paperSize: "auto",
+      margin: 40,
+      fileName: `Report for ${new Date().getFullYear()}`,
+    });
+  };
+  const exportPDFWithComponent = () => {
+    if (pdfExportComponent.current) {
+      pdfExportComponent.current.save();
+    }
+  };
   const { id, userId } = useParams();
   const [reportData, setReportData] = useState({
     assessmentDetails: {
@@ -192,136 +208,151 @@ const AssessmentReport = () => {
         ) : error ? (
           <div className="text-center py-10 text-red-500">Error: {error}</div>
         ) : (
-          <>
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h2 className="text-2xl font-semibold text-green-600">
-                  {reportData.assessmentDetails.title} Report
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  Completed on:{" "}
-                  {formatDate(reportData.assessmentDetails.completion_date)}
-                </p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <button className="flex items-center space-x-2 px-4 py-2 border rounded-md">
-                    <span>
-                      Date:{" "}
-                      {formatDate(reportData.assessmentDetails.completion_date)}
-                    </span>
-                    <ChevronDown className="w-4 h-4" />
+          <PDFExport
+            ref={pdfExportComponent}
+            paperSize="auto"
+            margin={40}
+            fileName={`Report for ${new Date().getFullYear()}`}
+            author="KendoReact Team"
+          >
+            <div ref={container}>
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h2 className="text-2xl font-semibold text-green-600">
+                    {reportData.assessmentDetails.title} Report
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Completed on:{" "}
+                    {formatDate(reportData.assessmentDetails.completion_date)}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <button className="flex items-center space-x-2 px-4 py-2 border rounded-md">
+                      <span>
+                        Date:{" "}
+                        {formatDate(
+                          reportData.assessmentDetails.completion_date
+                        )}
+                      </span>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={exportPDFWithMethod}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center space-x-2"
+                  >
+                    <span>Download Report</span>
                   </button>
                 </div>
-                <button className="bg-green-600 text-white px-4 py-2 rounded-md flex items-center space-x-2">
-                  <span>Download Report</span>
-                </button>
               </div>
-            </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
-                <div className="text-sm text-gray-500">Overall Score</div>
-                <div className="text-3xl font-bold text-green-600">
-                  {reportData.assessmentDetails.score}%
+              {/* Stats Cards */}
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
+                  <div className="text-sm text-gray-500">Overall Score</div>
+                  <div className="text-3xl font-bold text-green-600">
+                    {reportData.assessmentDetails.score}%
+                  </div>
+                </div>
+                <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
+                  <div className="text-sm text-gray-500">Status</div>
+                  <div
+                    className={`text-3xl font-bold ${
+                      reportData.assessmentDetails.passed
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {reportData.assessmentDetails.passed ? "Pass" : "Fail"}
+                  </div>
+                </div>
+                <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
+                  <div className="text-sm text-gray-500">Time Taken</div>
+                  <div className="text-3xl font-bold text-green-600">
+                    {reportData.assessmentDetails.time_taken || "N/A"} min
+                  </div>
                 </div>
               </div>
-              <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
-                <div className="text-sm text-gray-500">Status</div>
-                <div
-                  className={`text-3xl font-bold ${
-                    reportData.assessmentDetails.passed
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }`}
-                >
-                  {reportData.assessmentDetails.passed ? "Pass" : "Fail"}
+
+              {/* Detailed Data Section */}
+              <div className="bg-white shadow-sm rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-4">
+                  Assessment History
+                </h3>
+
+                {/* Search Bar */}
+                <div className="relative mb-6">
+                  <input
+                    type="text"
+                    placeholder="Search assessments"
+                    className="w-full px-4 py-2 border rounded-md pl-10"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1); // Reset to first page when searching
+                    }}
+                  />
+                  <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                 </div>
-              </div>
-              <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
-                <div className="text-sm text-gray-500">Time Taken</div>
-                <div className="text-3xl font-bold text-green-600">
-                  {reportData.assessmentDetails.time_taken || "N/A"} min
-                </div>
-              </div>
-            </div>
 
-            {/* Detailed Data Section */}
-            <div className="bg-white shadow-sm rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Assessment History</h3>
-
-              {/* Search Bar */}
-              <div className="relative mb-6">
-                <input
-                  type="text"
-                  placeholder="Search assessments"
-                  className="w-full px-4 py-2 border rounded-md pl-10"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1); // Reset to first page when searching
-                  }}
-                />
-                <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
-              </div>
-
-              {/* Table */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4">ID</th>
-                      <th className="text-left py-3 px-4">Date & Time</th>
-                      <th className="text-left py-3 px-4">Assessment ID</th>
-                      <th className="text-left py-3 px-4">Score</th>
-                      <th className="text-left py-3 px-4">Grade</th>
-                      <th className="text-right py-3 px-4">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {assessmentHistory.length > 0 ? (
-                      assessmentHistory.map((assessment, index) => (
-                        <tr key={assessment.id} className="border-b">
-                          <td className="py-4 px-4">{index + 1}</td>
-                          <td className="py-4 px-4">
-                            {formatDate(assessment.completed_at)}
-                          </td>
-                          <td className="py-4 px-4">
-                            {assessment.assessment_id}
-                          </td>
-                          <td className="py-4 px-4">{assessment.score}%</td>
-                          <td className="py-4 px-4">
-                            {getGradeText(assessment.score)}
-                          </td>
-                          <td className="py-4 px-4">
-                            <Link
-                              to={`/assessment-report/${assessment.assessment_id}`}
-                              className="flex items-center space-x-1 text-green-600 ml-auto"
-                            >
-                              <span>View Report</span>
-                              <Download className="w-4 h-4" />
-                            </Link>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4">ID</th>
+                        <th className="text-left py-3 px-4">Date & Time</th>
+                        <th className="text-left py-3 px-4">Assessment ID</th>
+                        <th className="text-left py-3 px-4">Score</th>
+                        <th className="text-left py-3 px-4">Grade</th>
+                        <th className="text-right py-3 px-4">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {assessmentHistory.length > 0 ? (
+                        assessmentHistory.map((assessment, index) => (
+                          <tr key={assessment.id} className="border-b">
+                            <td className="py-4 px-4">{index + 1}</td>
+                            <td className="py-4 px-4">
+                              {formatDate(assessment.completed_at)}
+                            </td>
+                            <td className="py-4 px-4">
+                              {assessment.assessment_id}
+                            </td>
+                            <td className="py-4 px-4">{assessment.score}%</td>
+                            <td className="py-4 px-4">
+                              {getGradeText(assessment.score)}
+                            </td>
+                            <td className="py-4 px-4">
+                              <Link
+                                to={`/assessment-report/${assessment.assessment_id}`}
+                                className="flex items-center space-x-1 text-green-600 ml-auto"
+                              >
+                                <span>View Report</span>
+                                <Download className="w-4 h-4" />
+                              </Link>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="py-4 px-4 text-center text-gray-500"
+                          >
+                            {searchTerm
+                              ? "No assessments match your search"
+                              : "No assessment history available"}
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="6"
-                          className="py-4 px-4 text-center text-gray-500"
-                        >
-                          {searchTerm
-                            ? "No assessments match your search"
-                            : "No assessment history available"}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </>
+          </PDFExport>
         )}
       </main>
 
