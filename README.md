@@ -127,3 +127,7 @@ Automatic deployments will be set up to trigger on push to the main branch or a 
 ## Video Demo
 
 https://drive.google.com/file/d/1tF8Z5SVkptgX4GGKRcnFkx1-khx4GRFn/view?usp=sharing
+
+## Final Implementation In Progress Video
+
+https://drive.google.com/file/d/1xvCOWleQEtchH5DP6kj-DF9nU7zbUt-i/view?usp=sharing
