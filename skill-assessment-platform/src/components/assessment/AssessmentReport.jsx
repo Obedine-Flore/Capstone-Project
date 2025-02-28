@@ -357,20 +357,12 @@ const AssessmentReport = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-green-600 mb-6">
-              Skills<span className="text-gray-900">Assess</span>
-            </h2>
-            <p className="text-gray-500 text-sm">
-              © 2023 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              <br />
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem
-              ipsum dolor sit amet, consectetur adipiscing elit.
-            </p>
-          </div>
-        </div>
+      <footer className="bg-gray-100 text-center p-8 mt-12 rounded-lg">
+        <h1 className="text-green-700 font-bold">SkillsAssess</h1>
+        <p className="text-sm text-gray-600">
+          &copy; {new Date().getFullYear()} SkillsAssess. All rights
+          reserved.
+        </p>
       </footer>
     </div>
   );

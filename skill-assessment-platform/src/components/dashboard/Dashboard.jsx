@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search, ChevronDown, Award, TrendingUp, BookOpen } from 'lucide-react';
 import axios from "axios";
 
 const Dashboard = () => {
@@ -10,12 +10,14 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   // Separate states for all skills and recommended skills
   const [allSkills, setAllSkills] = useState([]);
   const [recommendedSkills, setRecommendedSkills] = useState([]);
   const [assessmentHistory, setAssessmentHistory] = useState([]);
+  const [relevantSkillIds, setRelevantSkillIds] = useState([]);
   
   // Pagination states
   const [allSkillsPage, setAllSkillsPage] = useState(1);
@@ -27,9 +29,29 @@ const Dashboard = () => {
   useEffect(() => {
     fetchUserData();
     fetchUserProfile();
-    fetchSkills();
-    fetchAssessmentHistory();
   }, []);
+
+  // Debounce search term changes
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm]);
+
+  // Re-fetch skills when search or category changes
+  useEffect(() => {
+    setAllSkillsPage(1);
+    fetchSkills(1);
+    
+    if (relevantSkillIds.length > 0) {
+      setRecommendedSkillsPage(1);
+      fetchRecommendedSkills(relevantSkillIds, 1);
+    }
+  }, [debouncedSearchTerm, selectedCategory]);
 
   const fetchUserData = () => {
     const storedName = localStorage.getItem('user');
@@ -57,6 +79,8 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUserData(response.data);
+      fetchAssessmentHistory(response.data.id);
+      fetchSkills(1);
     } catch (error) {
       console.error("Error fetching user data:", error);
       setError("Failed to load profile data");
@@ -65,15 +89,16 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch skills with pagination
+  // Fetch skills with pagination and search
   const fetchSkills = async (page = 1) => {
     try {
+      setIsLoading(true);
       const response = await axios.get(`http://localhost:5000/api/all-skills`, {
         params: {
           page,
-          limit: 6,
+          limit: 10,
           category: selectedCategory !== 'All' ? selectedCategory : undefined,
-          search: searchTerm || undefined
+          search: debouncedSearchTerm || undefined
         }
       });
 
@@ -89,14 +114,20 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching skills:", error);
       setError("Failed to load skills");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Fetch assessment history and generate recommendations
-  const fetchAssessmentHistory = async () => {
+  const fetchAssessmentHistory = async (userId) => {
+    if (!userId) return;
+    
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/user-assessments/history?userId=${userId}", {
+      if (!token) return;
+      
+      const response = await axios.get(`http://localhost:5000/api/user-assessments/history?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -119,22 +150,27 @@ const Dashboard = () => {
       .filter(assessment => assessment.score < 70)
       .map(assessment => assessment.skillId);
 
+    setRelevantSkillIds(lowScoreSkills);
+    
     // Fetch recommended skills based on the analysis
-    fetchRecommendedSkills(lowScoreSkills);
+    fetchRecommendedSkills(lowScoreSkills, 1);
   };
 
-  const fetchRecommendedSkills = async (relevantSkillIds, page = 1) => {
+  const fetchRecommendedSkills = async (skillIds, page = 1) => {
     try {
-      const token = localStorage.getItem('token'); // Retrieve the token from local storage (or another secure storage method)
+      const token = localStorage.getItem('token');
+      if (!token) return;
   
       const response = await axios.get("http://localhost:5000/api/recommended-skills", {
         headers: {
-          Authorization: `Bearer ${token}` // Include the token
+          Authorization: `Bearer ${token}`
         },
         params: {
-          skillIds: relevantSkillIds?.join(',') || '', // Ensure skillIds is properly formatted
+          skillIds: skillIds?.join(',') || '',
           page,
-          limit: 6
+          limit: 6,
+          category: selectedCategory !== 'All' ? selectedCategory : undefined,
+          search: debouncedSearchTerm || undefined
         }
       });
   
@@ -152,7 +188,6 @@ const Dashboard = () => {
     }
   };
   
-
   // Load more skills
   const loadMoreAllSkills = () => {
     const nextPage = allSkillsPage + 1;
@@ -163,31 +198,80 @@ const Dashboard = () => {
   const loadMoreRecommended = () => {
     const nextPage = recommendedSkillsPage + 1;
     setRecommendedSkillsPage(nextPage);
-    fetchRecommendedSkills(nextPage);
+    fetchRecommendedSkills(relevantSkillIds, nextPage);
   };
 
-  const renderSkillsGrid = (skills, onLoadMore, hasMore) => (
-    <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  // Helper function to determine progress bar color based on proficiency level
+  const getProgressBarColor = (proficiency) => {
+    if (proficiency < 40) return 'bg-red-500';
+    if (proficiency < 70) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  // Helper function to get icon based on category
+  const getCategoryIcon = (category) => {
+    switch(category) {
+      case 'Soft Skills':
+        return <Award className="text-purple-500" size={18} />;
+      case 'Technical':
+        return <TrendingUp className="text-blue-500" size={18} />;
+      case 'Cognitive':
+        return <BookOpen className="text-orange-500" size={18} />;
+      default:
+        return <Award className="text-green-500" size={18} />;
+    }
+  };
+
+  const renderSkillsGrid = (skills, onLoadMore, hasMore, showProficiency = false) => (
+    <div className="px-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {skills.map((skill) => (
-          <div key={skill.id} className="bg-white border rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h4 className="text-lg font-semibold text-gray-800">{skill.name}</h4>
-                <span className="text-sm text-gray-500">{skill.category}</span>
+          <div 
+            key={skill.id} 
+            className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 group-hover:text-green-600 transition-colors">{skill.name}</h4>
+                  <div className="flex items-center mt-1 text-sm text-gray-500">
+                    {getCategoryIcon(skill.category)}
+                    <span className="ml-1">{skill.category}</span>
+                  </div>
+                </div>
+                {skill.assessmentCount && (
+                  <span className="text-sm font-medium px-3 py-1 bg-green-50 text-green-600 rounded-full">
+                    {skill.assessmentCount} assessments
+                  </span>
+                )}
               </div>
-              {skill.assessmentCount && (
-                <span className="text-sm text-gray-500">
-                  {skill.assessmentCount} assessments
-                </span>
+              
+              <p className="text-sm text-gray-600 mb-5 line-clamp-2">{skill.description}</p>
+              
+              {/* Proficiency bar for recommended skills */}
+              {showProficiency && (
+                <div className="mb-5">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">Proficiency</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {skill.proficiency || Math.floor(Math.random() * 100)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2.5">
+                    <div 
+                      className={`${getProgressBarColor(skill.proficiency || Math.floor(Math.random() * 100))} h-2.5 rounded-full transition-all duration-500`} 
+                      style={{ width: `${skill.proficiency || Math.floor(Math.random() * 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
               )}
             </div>
-            <p className="text-sm text-gray-600 mb-4">{skill.description}</p>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">{skill.difficulty}</span>
+            
+            <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-100">
+              <span className="text-sm font-medium px-3 py-1 bg-gray-200 text-gray-700 rounded-full">{skill.difficulty}</span>
               <Link
                 to={`/assessment/${skill.id}`}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 hover:shadow-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
               >
                 Start Assessment
               </Link>
@@ -196,116 +280,169 @@ const Dashboard = () => {
         ))}
       </div>
       {hasMore && (
-        <button
-          onClick={onLoadMore}
-          className="mt-6 flex items-center mx-auto px-6 py-2 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors"
-        >
-          See More <ChevronDown className="ml-2" size={16} />
-        </button>
+        <div className="flex justify-center mt-10">
+          <button
+            onClick={onLoadMore}
+            className="flex items-center px-8 py-3 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 shadow-sm hover:shadow"
+          >
+            See More <ChevronDown className="ml-2" size={16} />
+          </button>
+        </div>
       )}
     </div>
   );
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setAllSkillsPage(1);
+    fetchSkills(1);
+    
+    if (relevantSkillIds.length > 0) {
+      setRecommendedSkillsPage(1);
+      fetchRecommendedSkills(relevantSkillIds, 1);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col justify-between px-8 py-6">
+    <div className="min-h-screen flex flex-col justify-between bg-gray-50">
       {/* Navbar */}
-      <header className="flex justify-between items-center p-6 shadow-md bg-white rounded-lg">
-              <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
-              <nav className="space-x-6">
-                <Link to="/dashboard" className="text-green-700 font-semibold">Dashboard</Link>
-                <Link to="/assessments" className="text-gray-700">Assessments</Link>
-                <Link to="/peerreviews" className="text-gray-700">Peer Reviews</Link>
-                <Link to="/blog" className="text-gray-700">Blog</Link>
-              </nav>
-              <Link to="/profile">
-                <div className="w-10 h-10 rounded-full overflow-hidden">
-                  {userData?.profile_picture ? (
-                    <img
-                      src={userData.profile_picture.startsWith('http') 
-                        ? userData.profile_picture 
-                        : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
-                      alt="Profile"
-                      className="w-10 h-10 object-cover"
-                      onError={(e) => {
-                        e.target.src = "/default-profile.jpg";
-                      }}
-                    />
-                  ) : (
-                    <img 
-                      src="/default-profile.jpg"
-                      alt="Profile" 
-                      className="w-10 h-10 object-cover" 
-                    />
-                  )}
-                </div>
-              </Link>
+      <header className="flex justify-between items-center px-8 py-4 shadow-sm bg-white sticky top-0 z-10">
+        <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
+        <nav className="space-x-8">
+          <Link to="/dashboard" className="text-green-700 font-semibold border-b-2 border-green-500 pb-1">Dashboard</Link>
+          <Link to="/assessments" className="text-gray-700 hover:text-green-600 transition-colors">Assessments</Link>
+          <Link to="/blog" className="text-gray-700 hover:text-green-600 transition-colors">Blog</Link>
+        </nav>
+        <Link to="/profile" className="hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500 ring-offset-2">
+            {userData?.profile_picture ? (
+              <img
+                src={userData.profile_picture.startsWith('http') 
+                  ? userData.profile_picture 
+                  : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
+                alt="Profile"
+                className="w-10 h-10 object-cover"
+                onError={(e) => {
+                  e.target.src = "/default-profile.jpg";
+                }}
+              />
+            ) : (
+              <img 
+                src="/default-profile.jpg"
+                alt="Profile" 
+                className="w-10 h-10 object-cover" 
+              />
+            )}
+          </div>
+        </Link>
       </header>
       
-      <main className="container mx-auto p-8">
+      <main className="container mx-auto max-w-7xl py-10 px-4 sm:px-6 lg:px-8 flex-grow">
         {/* Welcome section */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-xl font-semibold">Hello {userName || 'Guest'},</h2>
-            <p className="text-lg text-green-700 font-semibold mt-2">
-              Ready to enhance your skills?
-            </p>
+        <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 mb-10 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-800">Hello {userName || 'Guest'},</h2>
+              <p className="text-lg text-green-700 font-medium mt-2">
+                Ready to enhance your skills today?
+              </p>
+            </div>
+            <div className="hidden md:block">
+              <div className="bg-white p-4 rounded-xl shadow-sm">
+                <div className="text-sm text-gray-600">Assessments completed</div>
+                <div className="text-2xl font-bold text-green-600 mt-1">{assessmentHistory.length || 0}</div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Search and Filter Section */}
         <div className="mb-12">
-          <div className="flex items-center space-x-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-3 text-gray-400" size={20} />
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-center gap-4">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-4 top-3.5 text-gray-400" size={20} />
               <input
                 type="text"
                 placeholder="Search skills..."
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setAllSkillsPage(1);
-                  fetchSkills(1);
-                }}
-                className="pl-12 pr-4 py-3 rounded-full w-full border focus:outline-none focus:ring-2 focus:ring-green-500"
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-12 pr-4 py-3.5 rounded-xl w-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm"
               />
             </div>
             <select
               value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setAllSkillsPage(1);
-                fetchSkills(1);
-              }}
-              className="px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-green-500"
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-3.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm w-full md:w-auto"
             >
               <option value="All">All Categories</option>
               <option value="Soft Skills">Soft Skills</option>
               <option value="Technical">Technical</option>
               <option value="Cognitive">Cognitive</option>
             </select>
-          </div>
+            <button 
+              type="submit"
+              className="px-8 py-3.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors shadow-sm hover:shadow w-full md:w-auto"
+            >
+              Search
+            </button>
+          </form>
         </div>
 
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex justify-center my-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
+          </div>
+        )}
+
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-10 shadow-sm">
+            <p className="font-bold">Error</p>
+            <p>{error}</p>
+          </div>
+        )}
+
         {/* Recommended Skills Section */}
-        <section className="mb-12">
-          <h3 className="text-xl font-semibold text-green-700 mb-6">
-            Recommended for You
-          </h3>
-          {renderSkillsGrid(recommendedSkills, loadMoreRecommended, hasMoreRecommended)}
+        <section className="mb-16">
+          <div className="flex items-center mb-6">
+            <h3 className="text-2xl font-semibold text-green-700">
+              Recommended for You
+            </h3>
+            <div className="h-px flex-grow bg-gray-200 ml-4"></div>
+          </div>
+          {!isLoading && (
+            recommendedSkills.length > 0 ? (
+              renderSkillsGrid(recommendedSkills, loadMoreRecommended, hasMoreRecommended, true)
+            ) : (
+              <div className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow-sm">
+                <p className="text-gray-600">Complete some assessments to get personalized recommendations!</p>
+              </div>
+            )
+          )}
         </section>
 
         {/* All Skills Section */}
-        <section>
-          <h3 className="text-xl font-semibold text-green-700 mb-6">
-            All Skills
-          </h3>
-          {renderSkillsGrid(allSkills, loadMoreAllSkills, hasMoreAllSkills)}
+        <section className="mb-10">
+          <div className="flex items-center mb-6">
+            <h3 className="text-2xl font-semibold text-green-700">
+              All Skills
+            </h3>
+            <div className="h-px flex-grow bg-gray-200 ml-4"></div>
+          </div>
+          {!isLoading && allSkills.length > 0 ? (
+            renderSkillsGrid(allSkills, loadMoreAllSkills, hasMoreAllSkills)
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow-sm">
+              <p className="text-gray-600">No skills found matching your criteria.</p>
+            </div>
+          )}
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 text-center p-8 mt-12 rounded-lg">
-        <h1 className="text-green-700 font-bold">SkillsAssess</h1>
+      <footer className="bg-white text-center p-10 mt-auto border-t border-gray-200">
+        <h1 className="text-xl font-bold text-green-700 mb-2">SkillsAssess</h1>
         <p className="text-sm text-gray-600">&copy; {new Date().getFullYear()} SkillsAssess. All rights reserved.</p>
       </footer>
     </div>

@@ -123,107 +123,265 @@ router.get('/recommended-skills', auth, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 6;
     const offset = (page - 1) * limit;
-
+    
     const connection = await pool.getConnection();
-
-    // 1. Get user's assessment history
-    const [assessments] = await connection.query(`
-      SELECT ua.assessment_id, ua.score, s.category
+    
+    // 1. Get user's low-scoring assessments (below 70)
+    const [lowScoreAssessments] = await connection.query(`
+      SELECT 
+        ua.assessment_id, 
+        ua.score, 
+        s.name, 
+        s.category, 
+        s.description, 
+        s.difficulty 
       FROM user_assessments ua
-      JOIN assessments a ON ua.assessment_id = a.id
-      JOIN all_skills s ON a.id = s.id
-      WHERE ua.user_id = ?
-      ORDER BY ua.completed_at DESC
-    `, [userId]);    
-
-    // 2. Get categories user has shown interest in
-    const userCategories = [...new Set(assessments.map(a => a.category))];
-
-    // 3. Get skills that need improvement (score < 70)
-    const lowScoreSkills = assessments
-      .filter(a => a.score < 70)
-      .map(a => a.assessment_id);
-
-    // 4. Get related skills based on categories and difficulty
-  const query = `
-  SELECT 
-    s.id,
-    s.name,
-    s.category,
-    s.description,
-    s.difficulty,
-    COUNT(DISTINCT ua.id) AS popularity,
-    AVG(ua.score) AS avg_score
-  FROM all_skills s
-  LEFT JOIN user_assessments ua ON s.id = ua.assessment_id
-  WHERE 
-    s.id NOT IN (SELECT assessment_id FROM user_assessments WHERE user_id = ?)
-    AND (
-      s.category IN (?)
-      OR s.id IN (
-        SELECT s2.id
-        FROM all_skills s2
-        WHERE s2.difficulty = (
-          SELECT difficulty 
-          FROM all_skills 
-          WHERE id IN (?)
-          LIMIT 1
-        )
-      )
-    )
-  GROUP BY s.id
-  ORDER BY 
-    CASE 
-      WHEN s.category IN (?) THEN 1
-      ELSE 2
-    END,
-    popularity DESC,
-    avg_score ASC
-  LIMIT ? OFFSET ?
-`;
-
-const [recommendedSkills] = await connection.query(query, [
-  userId,
-  userCategories,
-  lowScoreSkills,
-  userCategories,
-  limit,
-  offset
-]);
-
-    // Get total count for pagination
-    const [countResult] = await connection.query(`
-      SELECT COUNT(DISTINCT s.id) as total
-      FROM all_skills s
-      WHERE 
-        s.id NOT IN (SELECT assessment_id FROM user_assessments WHERE user_id = ?)
-        AND (
-          s.category IN (?)
-          OR s.id IN (
-            SELECT s2.id
-            FROM all_skills s2
-            WHERE s2.difficulty = (
-              SELECT difficulty 
-              FROM all_skills 
-              WHERE id IN (?)
-              LIMIT 1
-            )
-          )
-        )
-    `, [userId, userCategories, lowScoreSkills]);
-
+      JOIN all_skills s ON ua.assessment_id = s.id
+      WHERE ua.user_id = ? AND ua.score < 70
+      ORDER BY ua.score ASC, ua.completed_at DESC
+    `, [userId]);
+    
+    console.log('Low Score Assessments:', lowScoreAssessments);
+    
+    // Format the low-score skills
+    const lowScoreSkills = lowScoreAssessments.map(assessment => ({
+      id: assessment.assessment_id,
+      name: assessment.name,
+      category: assessment.category,
+      description: assessment.description,
+      difficulty: assessment.difficulty,
+      previous_score: assessment.score,
+      needs_improvement: true
+    }));
+    
+    // Calculate how many new skills we need to fetch
+    const remainingSkillsNeeded = Math.max(0, limit - lowScoreSkills.length);
+    
+    let recommendedSkills = lowScoreSkills;
+    
+    // Only fetch new skills if we need more to reach the limit
+    if (remainingSkillsNeeded > 0) {
+      // 2. Get user's assessment history for category preferences
+      const [assessments] = await connection.query(`
+        SELECT ua.assessment_id, s.category, s.difficulty
+        FROM user_assessments ua
+        JOIN all_skills s ON ua.assessment_id = s.id
+        WHERE ua.user_id = ?
+        ORDER BY ua.completed_at DESC
+      `, [userId]);
+      
+      // Get categories user has shown interest in
+      const userCategories = [...new Set(assessments.map(a => a.category))];
+      const categoriesForQuery = userCategories.length > 0 ? userCategories : ['Cognitive Skills']; // Default
+      
+      // Get IDs of all assessments the user has taken (to exclude them)
+      const takenAssessmentIds = assessments.map(a => a.assessment_id);
+      // Also exclude the low score skills we're already recommending
+      const lowScoreIds = lowScoreSkills.map(s => s.id);
+      const excludeIds = [...takenAssessmentIds, ...lowScoreIds];
+      const excludeIdsPlaceholder = excludeIds.length > 0 ? excludeIds.map(() => '?').join(',') : '0';
+      
+      // Query for new recommended skills
+      const newSkillsQuery = `
+        SELECT 
+          s.id,
+          s.name,
+          s.category,
+          s.description,
+          s.difficulty,
+          COUNT(DISTINCT ua.id) AS popularity,
+          COALESCE(AVG(ua.score), 0) AS avg_score
+        FROM all_skills s
+        LEFT JOIN user_assessments ua ON s.id = ua.assessment_id
+        WHERE 
+          s.id NOT IN (${excludeIdsPlaceholder})
+          AND s.category IN (${categoriesForQuery.map(() => '?').join(',')})
+        GROUP BY s.id
+        ORDER BY
+          CASE WHEN s.category IN (${categoriesForQuery.map(() => '?').join(',')}) THEN 1 ELSE 2 END,
+          popularity DESC,
+          avg_score ASC
+        LIMIT ?
+      `;
+      
+      // Combine all query parameters
+      const queryParams = [
+        ...excludeIds,
+        ...categoriesForQuery,
+        ...categoriesForQuery,
+        remainingSkillsNeeded
+      ];
+      
+      const [newSkills] = await connection.query(newSkillsQuery, queryParams);
+      
+      // Combine both sets of skills
+      recommendedSkills = [
+        ...lowScoreSkills,
+        ...newSkills.map(skill => ({
+          id: skill.id,
+          name: skill.name,
+          category: skill.category,
+          description: skill.description,
+          difficulty: skill.difficulty,
+          popularity: skill.popularity,
+          avg_score: skill.avg_score,
+          is_new: true
+        }))
+      ];
+    }
+    
+    // Apply pagination to the combined results
+    const paginatedSkills = recommendedSkills.slice(offset, offset + limit);
+    
+    // Calculate total for pagination
+    const total = recommendedSkills.length;
+    const hasMore = offset + paginatedSkills.length < total;
+    
     connection.release();
-
-    const total = countResult[0].total;
-    const hasMore = offset + recommendedSkills.length < total;
-
+    
     res.json({
-      skills: recommendedSkills,
+      skills: paginatedSkills,
       total,
       hasMore,
       currentPage: page
     });
+    
+  } catch (error) {
+    console.error('Error fetching recommended skills:', error);
+    res.status(500).json({ message: 'Error fetching recommended skills' });
+  }
+});
 
+// Add this temporary route to check your database
+router.get('/recommended-skills', auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const offset = (page - 1) * limit;
+    
+    const connection = await pool.getConnection();
+    
+    // 1. Get user's low-scoring assessments (below 70)
+    const [lowScoreAssessments] = await connection.query(`
+      SELECT 
+        ua.assessment_id, 
+        ua.score, 
+        s.name, 
+        s.category, 
+        s.description, 
+        s.difficulty 
+      FROM user_assessments ua
+      JOIN all_skills s ON ua.assessment_id = s.id
+      WHERE ua.user_id = ? AND ua.score < 70
+      ORDER BY ua.score ASC, ua.completed_at DESC
+    `, [userId]);
+    
+    console.log('Low Score Assessments:', lowScoreAssessments);
+    
+    // Format the low-score skills
+    const lowScoreSkills = lowScoreAssessments.map(assessment => ({
+      id: assessment.assessment_id,
+      name: assessment.name,
+      category: assessment.category,
+      description: assessment.description,
+      difficulty: assessment.difficulty,
+      previous_score: assessment.score,
+      needs_improvement: true
+    }));
+    
+    // Calculate how many new skills we need to fetch
+    const remainingSkillsNeeded = Math.max(0, limit - lowScoreSkills.length);
+    
+    let recommendedSkills = lowScoreSkills;
+    
+    // Only fetch new skills if we need more to reach the limit
+    if (remainingSkillsNeeded > 0) {
+      // 2. Get user's assessment history for category preferences
+      const [assessments] = await connection.query(`
+        SELECT ua.assessment_id, s.category, s.difficulty
+        FROM user_assessments ua
+        JOIN all_skills s ON ua.assessment_id = s.id
+        WHERE ua.user_id = ?
+        ORDER BY ua.completed_at DESC
+      `, [userId]);
+      
+      // Get categories user has shown interest in
+      const userCategories = [...new Set(assessments.map(a => a.category))];
+      const categoriesForQuery = userCategories.length > 0 ? userCategories : ['Cognitive Skills']; // Default
+      
+      // Get IDs of all assessments the user has taken (to exclude them)
+      const takenAssessmentIds = assessments.map(a => a.assessment_id);
+      // Also exclude the low score skills we're already recommending
+      const lowScoreIds = lowScoreSkills.map(s => s.id);
+      const excludeIds = [...takenAssessmentIds, ...lowScoreIds];
+      const excludeIdsPlaceholder = excludeIds.length > 0 ? excludeIds.map(() => '?').join(',') : '0';
+      
+      // Query for new recommended skills
+      const newSkillsQuery = `
+        SELECT 
+          s.id,
+          s.name,
+          s.category,
+          s.description,
+          s.difficulty,
+          COUNT(DISTINCT ua.id) AS popularity,
+          COALESCE(AVG(ua.score), 0) AS avg_score
+        FROM all_skills s
+        LEFT JOIN user_assessments ua ON s.id = ua.assessment_id
+        WHERE 
+          s.id NOT IN (${excludeIdsPlaceholder})
+          AND s.category IN (${categoriesForQuery.map(() => '?').join(',')})
+        GROUP BY s.id
+        ORDER BY
+          CASE WHEN s.category IN (${categoriesForQuery.map(() => '?').join(',')}) THEN 1 ELSE 2 END,
+          popularity DESC,
+          avg_score ASC
+        LIMIT ?
+      `;
+      
+      // Combine all query parameters
+      const queryParams = [
+        ...excludeIds,
+        ...categoriesForQuery,
+        ...categoriesForQuery,
+        remainingSkillsNeeded
+      ];
+      
+      const [newSkills] = await connection.query(newSkillsQuery, queryParams);
+      
+      // Combine both sets of skills
+      recommendedSkills = [
+        ...lowScoreSkills,
+        ...newSkills.map(skill => ({
+          id: skill.id,
+          name: skill.name,
+          category: skill.category,
+          description: skill.description,
+          difficulty: skill.difficulty,
+          popularity: skill.popularity,
+          avg_score: skill.avg_score,
+          is_new: true
+        }))
+      ];
+    }
+    
+    // Apply pagination to the combined results
+    const paginatedSkills = recommendedSkills.slice(offset, offset + limit);
+    
+    // Calculate total for pagination
+    const total = recommendedSkills.length;
+    const hasMore = offset + paginatedSkills.length < total;
+    
+    connection.release();
+    
+    res.json({
+      skills: paginatedSkills,
+      total,
+      hasMore,
+      currentPage: page
+    });
+    
   } catch (error) {
     console.error('Error fetching recommended skills:', error);
     res.status(500).json({ message: 'Error fetching recommended skills' });

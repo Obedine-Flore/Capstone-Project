@@ -17,7 +17,7 @@ const BlogLandingPage = () => {
   const [email, setEmail] = useState('');
   const [emailStatus, setEmailStatus] = useState('');
   
-  const postsPerPage = 3;
+  const postsPerPage = 4;
   
   const categories = [
     'All',
@@ -218,38 +218,36 @@ const BlogLandingPage = () => {
   return (
     <div className="min-h-screen flex flex-col justify-between px-4 md:px-8 py-6 bg-gray-50">
       {/* Navbar */}
-      <header className="flex flex-col md:flex-row justify-between items-center p-4 md:p-6 shadow-md bg-white rounded-lg">
-        <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
-        <nav className="mt-4 md:mt-0 space-x-3 md:space-x-6">
-          <a href="/dashboard" className="text-green-700 font-semibold">Dashboard</a>
-          <a href="/assessments" className="text-gray-700 hover:text-green-600 transition-colors">Assessments</a>
-          <a href="/peerreviews" className="text-gray-700 hover:text-green-600 transition-colors">Peer Reviews</a>
-          <a href="#" className="text-gray-900 font-semibold border-b-2 border-green-600 pb-1">Blog</a>  
-        </nav>
-        <Link to="/profile" className="mt-4 md:mt-0">
-          <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer border-2 border-green-100 hover:border-green-300 transition-all">
-            {userData && userData.profile_picture ? (
-              <img
-                src={userData.profile_picture.startsWith('http') 
-                  ? userData.profile_picture 
-                  : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
-                alt="Profile"
-                className="w-10 h-10 object-cover"
-                onError={(e) => {
-                  console.log("Profile image failed to load");
-                  e.target.src = profilePic;
-                }}
-              />
-            ) : (
-              <img 
-                src={profilePic} 
-                alt="Profile" 
-                className="w-10 h-10 object-cover" 
-              />
-            )}
-          </div>
-        </Link>
-      </header>
+      <header className="flex justify-between items-center px-8 py-4 shadow-sm bg-white sticky top-0 z-10">
+              <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
+              <nav className="space-x-8">
+                <Link to="/dashboard" className="text-gray-700 hover:text-green-600 transition-colors">Dashboard</Link>
+                <Link to="/assessments" className="text-gray-700 hover:text-green-600 transition-colors">Assessments</Link>
+                <Link to="/blog" className="text-green-700 font-semibold border-b-2 border-green-500 pb-1">Blog</Link>
+              </nav>
+              <Link to="/profile" className="hover:opacity-80 transition-opacity">
+                <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500 ring-offset-2">
+                  {userData?.profile_picture ? (
+                    <img
+                      src={userData.profile_picture.startsWith('http') 
+                        ? userData.profile_picture 
+                        : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
+                      alt="Profile"
+                      className="w-10 h-10 object-cover"
+                      onError={(e) => {
+                        e.target.src = "/default-profile.jpg";
+                      }}
+                    />
+                  ) : (
+                    <img 
+                      src="/default-profile.jpg"
+                      alt="Profile" 
+                      className="w-10 h-10 object-cover" 
+                    />
+                  )}
+                </div>
+              </Link>
+            </header>
 
       {/* Hero Section */}
       <main className="container mx-auto p-4 md:p-8 flex-grow">
