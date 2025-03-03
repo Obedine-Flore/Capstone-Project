@@ -1,27 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Search, Download, ChevronDown } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
-import profilePic from "../../assets/profile.jpg";
 import axios from "axios";
 import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
 
 const AssessmentReport = () => {
   const container = useRef(null);
   const pdfExportComponent = useRef(null);
-  const exportPDFWithMethod = () => {
-    let el = container.current || document.body;
-    savePDF(el, {
-      paperSize: "auto",
-      margin: 40,
-      fileName: `Report for ${new Date().getFullYear()}`,
-    });
-  };
-  const exportPDFWithComponent = () => {
-    if (pdfExportComponent.current) {
-      pdfExportComponent.current.save();
-    }
-  };
   const { id, userId } = useParams();
+  
+  // State management
   const [reportData, setReportData] = useState({
     assessmentDetails: {
       title: "",
@@ -35,10 +23,26 @@ const AssessmentReport = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [userData, setUserData] = useState(null);
-  // const itemsPerPage = 8;
+  const [userData, setUserData] = useState(null);
+  const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
 
+  // PDF Export functions
+  const exportPDFWithMethod = () => {
+    let el = container.current || document.body;
+    savePDF(el, {
+      paperSize: "auto",
+      margin: 40,
+      fileName: `Report for ${new Date().getFullYear()}`,
+    });
+  };
+  
+  const exportPDFWithComponent = () => {
+    if (pdfExportComponent.current) {
+      pdfExportComponent.current.save();
+    }
+  };
+
+  // Fetch report data
   useEffect(() => {
     setLoading(true);
     fetch(`http://localhost:5000/api/assessment-report/${id}`)
@@ -52,26 +56,17 @@ const AssessmentReport = () => {
             passed: (data[0]?.score || 0) >= 70,
             time_taken: data[0]?.time_taken || 0,
           },
-          skillBreakdown: data.map((item) => ({
+          skillBreakdown: data.map((item, index) => ({
+            key: `${item.skill_name || "Unknown Skill"}-${index}`,
             skillName: item.skill_name || "Unknown Skill",
             score: item.skill_score || 0,
           })),
         };
 
         setReportData(transformedData);
-
-        // After getting report data, fetch user assessment history
-        // return fetch(`http://localhost:5000/api/user-assessments/history?userId=${userId}`);
       })
-      // .then(response => response.json())
-      // .then(historyData => {
-      //   console.log("Check this out", historyData);
-      //   setAssessmentHistory(historyData);
-      //   setLoading(false);
-      // })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        setLoading(false);
         setError(error.message);
       })
       .finally(() => {
@@ -79,11 +74,18 @@ const AssessmentReport = () => {
       });
   }, [id]);
 
+  // Fetch assessment history
   useEffect(() => {
     setLoading(true);
     const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
     const userId = decodedToken.id;
+    
     fetch(
       `http://localhost:5000/api/user-assessments/history?userId=${userId}`,
       {
@@ -95,7 +97,6 @@ const AssessmentReport = () => {
       .then((response) => response.json())
       .then((response) => {
         if (response) {
-          console.table(response);
           const formattedData = response.map((assessment) => ({
             id: assessment.id, // user_assessment id
             reportId: assessment.report_id, // assessment_report id
@@ -108,9 +109,41 @@ const AssessmentReport = () => {
           setAssessmentHistory(formattedData);
         }
       })
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        console.error("Error fetching assessment history:", error);
+      })
       .finally(() => setLoading(false));
   }, []);
+
+  // Fetch user profile data
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get("http://localhost:5000/api/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserData(response.data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Toggle sort direction
+  const toggleSortDirection = () => {
+    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   // Format date
   const formatDate = (dateString) => {
@@ -132,42 +165,18 @@ const AssessmentReport = () => {
     return "Low";
   };
 
-  // const fetchAssessmentHistory = async () => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     const decodedToken = JSON.parse(atob(token.split('.')[1]));
-  //     const userId = decodedToken.id;
+  // Filter assessments based on search term
+  const filteredAssessments = searchTerm
+    ? assessmentHistory.filter(assessment =>
+        assessment.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    : assessmentHistory;
 
-  //     // Modified query to include assessment_reports.id
-  //     const response = await axios.get(
-  //       `http://localhost:5000/api/user-assessments/history?userId=${userId}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`
-  //         }
-  //       }
-  //     );
-
-  //     if (response.data) {
-  //       const formattedData = response.data.map(assessment => ({
-  //         id: assessment.id, // user_assessment id
-  //         reportId: assessment.report_id, // assessment_report id
-  //         title: assessment.title,
-  //         completion_date: assessment.completed_at,
-  //         score: assessment.score,
-  //         passed: assessment.score >= 70
-  //       }));
-
-  //       setAssessmentHistory(formattedData);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching assessment history:', error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //     fetchAssessmentHistory()
-  // },[id])
+  // Sort filtered assessments by date
+  const sortedAssessments = [...filteredAssessments].sort((a, b) => {
+    const dateA = new Date(a.completion_date || 0);
+    const dateB = new Date(b.completion_date || 0);
+    return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -183,20 +192,30 @@ const AssessmentReport = () => {
           <Link to="/assessments" className="text-green-700 font-semibold">
             Assessments
           </Link>
-          <a href="/peerreviews" className="text-gray-700">
-            Peer Reviews
-          </a>
           <a href="/blog" className="text-gray-700">
             Blog
           </a>
         </nav>
-        <Link to="/profile">
-          <div className="w-10 h-10 rounded-full overflow-hidden cursor-pointer">
-            <img
-              src={profilePic}
-              alt="Profile"
-              className="w-10 h-10 object-cover"
-            />
+        <Link to="/profile" className="hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500 ring-offset-2">
+            {userData?.profile_picture ? (
+              <img
+                src={userData.profile_picture.startsWith('http') 
+                  ? userData.profile_picture 
+                  : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
+                alt="Profile"
+                className="w-10 h-10 object-cover"
+                onError={(e) => {
+                  e.target.src = "/default-profile.jpg";
+                }}
+              />
+            ) : (
+              <img 
+                src="/default-profile.jpg"
+                alt="Profile" 
+                className="w-10 h-10 object-cover" 
+              />
+            )}
           </div>
         </Link>
       </header>
@@ -230,12 +249,12 @@ const AssessmentReport = () => {
                   <div className="relative">
                     <button className="flex items-center space-x-2 px-4 py-2 border rounded-md">
                       <span>
-                        Date:{" "}
+                        Date Taken:{" "}
                         {formatDate(
                           reportData.assessmentDetails.completion_date
                         )}
                       </span>
-                      <ChevronDown className="w-4 h-4" />
+                      {/* <ChevronDown className="w-4 h-4" /> */}
                     </button>
                   </div>
                   <button
@@ -251,7 +270,13 @@ const AssessmentReport = () => {
               <div className="grid grid-cols-3 gap-6 mb-8">
                 <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
                   <div className="text-sm text-gray-500">Overall Score</div>
-                  <div className="text-3xl font-bold text-green-600">
+                  <div
+                    className={`text-3xl font-bold ${
+                      reportData.assessmentDetails.passed
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}
+                  >
                     {reportData.assessmentDetails.score}%
                   </div>
                 </div>
@@ -288,10 +313,7 @@ const AssessmentReport = () => {
                     placeholder="Search assessments"
                     className="w-full px-4 py-2 border rounded-md pl-10"
                     value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1); // Reset to first page when searching
-                    }}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
                   <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
                 </div>
@@ -302,23 +324,29 @@ const AssessmentReport = () => {
                     <thead>
                       <tr className="border-b">
                         <th className="text-left py-3 px-4">ID</th>
-                        <th className="text-left py-3 px-4">Date & Time</th>
-                        <th className="text-left py-3 px-4">Assessment ID</th>
+                        <th 
+                          className="text-left py-3 px-4 cursor-pointer flex items-center" 
+                          onClick={toggleSortDirection}
+                        >
+                          Date & Time
+                          <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                        </th>
+                        <th className="text-left py-3 px-4">Title</th>
                         <th className="text-left py-3 px-4">Score</th>
                         <th className="text-left py-3 px-4">Grade</th>
                         <th className="text-right py-3 px-4">Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {assessmentHistory.length > 0 ? (
-                        assessmentHistory.map((assessment, index) => (
+                      {sortedAssessments.length > 0 ? (
+                        sortedAssessments.map((assessment, index) => (
                           <tr key={assessment.id} className="border-b">
                             <td className="py-4 px-4">{index + 1}</td>
                             <td className="py-4 px-4">
-                              {formatDate(assessment.completed_at)}
+                              {formatDate(assessment.completion_date)}
                             </td>
                             <td className="py-4 px-4">
-                              {assessment.assessment_id}
+                              {assessment.title}
                             </td>
                             <td className="py-4 px-4">{assessment.score}%</td>
                             <td className="py-4 px-4">
@@ -326,7 +354,7 @@ const AssessmentReport = () => {
                             </td>
                             <td className="py-4 px-4">
                               <Link
-                                to={`/assessment-report/${assessment.assessment_id}`}
+                                to={`/assessment-report/${assessment.reportId || assessment.id}`}
                                 className="flex items-center space-x-1 text-green-600 ml-auto"
                               >
                                 <span>View Report</span>

@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  //const [assessments, setAssessments] = useState([]);
   
   // Separate states for all skills and recommended skills
   const [allSkills, setAllSkills] = useState([]);
@@ -270,7 +271,7 @@ const Dashboard = () => {
             <div className="flex justify-between items-center px-6 py-4 bg-gray-50 border-t border-gray-100">
               <span className="text-sm font-medium px-3 py-1 bg-gray-200 text-gray-700 rounded-full">{skill.difficulty}</span>
               <Link
-                to={`/assessment/${skill.id}`}
+                to={`/assessments`}
                 className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 hover:shadow-lg transition-all duration-300 focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
               >
                 Start Assessment

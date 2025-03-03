@@ -115,9 +115,13 @@ const handleSubmitAssessment = async () => {
     return (
       <div className="max-w-3xl mx-auto p-6 text-center">
         <h1 className="text-2xl font-bold mb-6">Assessment Complete!</h1>
-        <div className="bg-white shadow-md rounded-lg p-8 mb-6">
+        <div className={`bg-white shadow-md rounded-lg p-8 mb-6 ${
+                      reportData.assessmentDetails.passed
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}>
           <div className="text-5xl font-bold text-green-600 mb-4">{score.percentage}%</div>
-          <p className="text-xl mb-2">You scored {score.score} out of {score.total}</p>
+          <p className=" text-xl mb-2">You scored {score.percentage}% out of a hundred</p>
           <p className="text-gray-600">
             {score.percentage >= 70 ? "Great job! You passed the assessment." : "Keep studying and try again!"}
           </p>
