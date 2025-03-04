@@ -14,6 +14,13 @@ const Assessment = () => {
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [showAllAssessments, setShowAllAssessments] = useState(false);
+
+  // Compute displayed assessments
+  const displayedAssessments = showAllAssessments 
+    ? assessments 
+    : assessments.slice(0, 6);
+
   useEffect(() => {
     fetchUserData();
     
@@ -168,29 +175,30 @@ const Assessment = () => {
 
         {/* Available Assessments */}
         <section className="mb-16">
-          <div className="flex items-center mb-6">
-            <h3 className="text-2xl font-semibold text-green-700">
-              Available Assessments
-            </h3>
-            <div className="h-px flex-grow bg-gray-200 ml-4"></div>
-          </div>
-          
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className="flex justify-center my-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
-            </div>
-          )}
-          
-          <div className="px-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {assessments.length > 0 ? (
-                assessments.map((assessment) => (
-                  <div 
-                    key={assessment.id} 
-                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
-                  >
-                    <div className="p-6">
+  <div className="flex items-center mb-6">
+    <h3 className="text-2xl font-semibold text-green-700">
+      Available Assessments
+    </h3>
+    <div className="h-px flex-grow bg-gray-200 ml-4"></div>
+  </div>
+  
+  {/* Loading indicator */}
+  {isLoading && (
+    <div className="flex justify-center my-12">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
+    </div>
+  )}
+  
+  <div className="px-2">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {assessments.length > 0 ? (
+        displayedAssessments.map((assessment) => (
+          <div 
+            key={assessment.id} 
+            className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group"
+          >
+            {/* Assessment card content remains the same */}
+            <div className="p-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h4 className="text-lg font-semibold text-gray-800 group-hover:text-green-600 transition-colors">{assessment.title}</h4>
@@ -226,16 +234,29 @@ const Assessment = () => {
                         Start Assessment
                       </button>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow-sm col-span-3">
-                  <p className="text-gray-600">No assessments available</p>
-                </div>
-              )}
-            </div>
           </div>
-        </section>
+        ))
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-xl p-8 text-center shadow-sm col-span-3">
+          <p className="text-gray-600">No assessments available</p>
+        </div>
+      )}
+    </div>
+
+    {/* See More Button */}
+    {assessments.length > 6 && !showAllAssessments && (
+      <div className="flex justify-center mt-8">
+        <button
+          onClick={() => setShowAllAssessments(true)}
+          className="flex items-center px-8 py-3 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors border border-green-300 hover:border-green-400 shadow-sm hover:shadow"
+        >
+          See More Assessments
+          <ChevronDown className="w-5 h-5" />
+        </button>
+      </div>
+    )}
+  </div>
+</section>
 
         {/* Assessment History */}
         <section className="mb-16">
