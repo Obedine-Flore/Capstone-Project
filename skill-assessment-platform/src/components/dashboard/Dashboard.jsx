@@ -2,8 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { Search, ChevronDown, Award, TrendingUp, BookOpen } from 'lucide-react';
 import axios from "axios";
+import { useTranslation } from "react-i18next";
+import Navbar from '../Navbar';
+//import LanguageSwitcher from "../LanguageSwitcher";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   // State management
   const [userName, setUserName] = useState('');
   const [userData, setUserData] = useState(null);
@@ -307,42 +311,14 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-gray-50">
       {/* Navbar */}
-      <header className="flex justify-between items-center px-8 py-4 shadow-sm bg-white sticky top-0 z-10">
-        <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
-        <nav className="space-x-8">
-          <Link to="/dashboard" className="text-green-700 font-semibold border-b-2 border-green-500 pb-1">Dashboard</Link>
-          <Link to="/assessments" className="text-gray-700 hover:text-green-600 transition-colors">Assessments</Link>
-          <Link to="/blog" className="text-gray-700 hover:text-green-600 transition-colors">Blog</Link>
-        </nav>
-        <Link to="/profile" className="hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500 ring-offset-2">
-            {userData?.profile_picture ? (
-              <img
-                src={userData.profile_picture.startsWith('http') 
-                  ? userData.profile_picture 
-                  : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
-                alt="Profile"
-                className="w-10 h-10 object-cover"
-                onError={(e) => {
-                  e.target.src = "/default-profile.jpg";
-                }}
-              />
-            ) : (
-              <img 
-                src="/default-profile.jpg"
-                alt="Profile" 
-                className="w-10 h-10 object-cover" 
-              />
-            )}
-          </div>
-        </Link>
-      </header>
+      <Navbar userData={userData}/>
       
       <main className="container mx-auto max-w-7xl py-10 px-4 sm:px-6 lg:px-8 flex-grow">
         {/* Welcome section */}
         <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 mb-10 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
+            <h1>{t("dashboard")}</h1>
               <h2 className="text-2xl font-semibold text-gray-800">Hello {userName || 'Guest'},</h2>
               <p className="text-lg text-green-700 font-medium mt-2">
                 Ready to enhance your skills today?

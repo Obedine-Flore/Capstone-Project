@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import { Search, ChevronDown } from 'lucide-react';
 import axios from "axios";
+import Navbar from '../Navbar';
 
 const Assessment = () => {
   const navigate = useNavigate();
@@ -143,36 +144,7 @@ const Assessment = () => {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-gray-50">
       {/* Navbar */}
-      <header className="flex justify-between items-center px-8 py-4 shadow-sm bg-white sticky top-0 z-10">
-        <h1 className="text-xl font-bold text-green-600">Skills<span className="text-gray-900">Assess</span></h1>
-        <nav className="space-x-8">
-          <Link to="/dashboard" className="text-gray-700 hover:text-green-600 transition-colors">Dashboard</Link>
-          <Link to="/assessments" className="text-green-700 font-semibold border-b-2 border-green-500 pb-1">Assessments</Link>
-          <Link to="/blog" className="text-gray-700 hover:text-green-600 transition-colors">Blog</Link>
-        </nav>
-        <Link to="/profile" className="hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500 ring-offset-2">
-            {userData?.profile_picture ? (
-              <img
-                src={userData.profile_picture.startsWith('http') 
-                  ? userData.profile_picture 
-                  : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
-                alt="Profile"
-                className="w-10 h-10 object-cover"
-                onError={(e) => {
-                  e.target.src = "/default-profile.jpg";
-                }}
-              />
-            ) : (
-              <img 
-                src="/default-profile.jpg"
-                alt="Profile" 
-                className="w-10 h-10 object-cover" 
-              />
-            )}
-          </div>
-        </Link>
-      </header>
+      <Navbar userData={userData}/>
 
       {/* Main Content */}
       <main className="container mx-auto max-w-7xl py-10 px-4 sm:px-6 lg:px-8 flex-grow">

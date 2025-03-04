@@ -181,7 +181,7 @@ const QuestionScreen = () => {
       <div className="flex justify-between mb-6">
         <span>Question {currentQuestion + 1} of {questions.length}</span>
         {/*<span className="text-red-600 font-bold">Time Remaining: {formatTime(timeLeft)}</span>*/}
-        <span>Time Taken: {Math.floor(elapsedTime / 60)} min {elapsedTime % 60} sec</span>
+        <span className="text-red-600 font-bold">Time Taken: {Math.floor(elapsedTime / 60)} min {elapsedTime % 60} sec</span>
       </div>
       <div className="w-full bg-gray-300 h-2 mb-6 rounded-2xl">
         <div className="bg-green-600 h-2 rounded-2xl" style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }} />

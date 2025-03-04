@@ -131,3 +131,7 @@ https://drive.google.com/file/d/1tF8Z5SVkptgX4GGKRcnFkx1-khx4GRFn/view?usp=shari
 ## Final Implementation In Progress Video
 
 https://drive.google.com/file/d/1xvCOWleQEtchH5DP6kj-DF9nU7zbUt-i/view?usp=sharing
+
+## Link to Deployed Application
+
+https://flore-capstone.vercel.app/

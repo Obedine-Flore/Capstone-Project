@@ -75,30 +75,45 @@ app.get('/api/assessments', async (req, res) => {
 });
 
 app.post('/api/assessments/:assessmentId/submit', async (req, res) => {
-  const { userId, assessmentId, score, time_taken } = req.body;
+  const { userId, assessmentId, score, total_questions, time_taken } = req.body;
 
-  console.log("Received submission data:", req.body); // Debugging log
+  console.log("Received submission data:", req.body); 
+  console.log("Time taken (type):", typeof time_taken);
+  console.log("Time taken (value):", time_taken);
 
   try {
+    // Ensure time_taken is converted to an integer
+    const parsedTimeTaken = parseInt(time_taken, 10);
+
     const query = `
-      INSERT INTO assessment_reports (user_assessment_id, user_id, assessment_id, score, time_taken, completed_at)
-      VALUES (?, ?, ?, ?, ?, NOW())
+      INSERT INTO assessment_reports (user_assessment_id, user_id, assessment_id, score, completed_at, time_taken)
+      VALUES (?, ?, ?, ?, NOW(), ?)
     `;
-    const [result] = await db.execute(query, [user_assessmentId, userId, assessmentId, score, time_taken]);
+    const [result] = await db.execute(query, [
+      assessmentId, 
+      userId, 
+      assessmentId, 
+      score, 
+      parsedTimeTaken  // Use parsed integer
+    ]);
 
     console.log("Database insert result:", result);
+    console.log("Inserted time_taken:", parsedTimeTaken);
 
     res.json({ 
       success: true, 
       message: "Assessment submitted and report generated successfully", 
       assessmentId, 
-      score,
-      time_taken,
-      userAssessmentId: result.insertId 
+      score, 
+      userAssessmentId: result.insertId, 
+      time_taken: parsedTimeTaken 
     });
   } catch (error) {
     console.error("Error saving assessment report:", error);
-    res.status(500).json({ error: "Failed to save assessment report" });
+    res.status(500).json({ 
+      error: "Failed to save assessment report", 
+      details: error.message 
+    });
   }
 });
 

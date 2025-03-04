@@ -3,6 +3,7 @@ import { Search, Download, ChevronDown } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
+import Navbar from '../Navbar';
 
 const AssessmentReport = () => {
   const container = useRef(null);
@@ -183,44 +184,7 @@ const AssessmentReport = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <header className="flex justify-between items-center p-6 shadow-md bg-white rounded-lg">
-        <h1 className="text-xl font-bold text-green-600">
-          Skills<span className="text-gray-900">Assess</span>
-        </h1>
-        <nav className="space-x-6">
-          <a href="/dashboard" className="text-gray-700">
-            Dashboard
-          </a>
-          <Link to="/assessments" className="text-green-700 font-semibold">
-            Assessments
-          </Link>
-          <a href="/blog" className="text-gray-700">
-            Blog
-          </a>
-        </nav>
-        <Link to="/profile" className="hover:opacity-80 transition-opacity">
-          <div className="w-10 h-10 rounded-full overflow-hidden ring-2 ring-green-500 ring-offset-2">
-            {userData?.profile_picture ? (
-              <img
-                src={userData.profile_picture.startsWith('http') 
-                  ? userData.profile_picture 
-                  : `http://localhost:5000/${userData.profile_picture.startsWith('/') ? userData.profile_picture.substring(1) : userData.profile_picture}`}
-                alt="Profile"
-                className="w-10 h-10 object-cover"
-                onError={(e) => {
-                  e.target.src = "/default-profile.jpg";
-                }}
-              />
-            ) : (
-              <img 
-                src="/default-profile.jpg"
-                alt="Profile" 
-                className="w-10 h-10 object-cover" 
-              />
-            )}
-          </div>
-        </Link>
-      </header>
+      <Navbar userData={userData}/>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

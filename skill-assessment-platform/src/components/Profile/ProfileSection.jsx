@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import profilePic from "../../assets/profile.jpg";
 import EditProfile from "./EditProfile";
 import axios from "axios";
+import { Link } from 'react-router-dom';
 
 const ProfileSection = () => {
   const navigate = useNavigate();
@@ -59,23 +60,20 @@ const ProfileSection = () => {
   return (
     <div className="min-h-screen flex flex-col justify-between px-8 py-6">
       {/* Navbar */}
-      <header className="flex justify-between items-center p-6 shadow-md bg-white rounded-lg">
-        <h1 className="text-xl font-bold text-green-600">
-          Skills<span className="text-gray-900">Assess</span>
-        </h1>
-        <nav className="space-x-6">
-          <a href="/dashboard" className="text-gray-700">Dashboard</a>
-          <a href="/assessments" className="text-gray-700">Assessments</a>
-          <a href="/peerreviews" className="text-gray-700">Peer Reviews</a>
-          <a href="/blog" className="text-gray-700">Blog</a>
-          <button 
-            onClick={handleSignOut}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg shadow hover:bg-green-700"
-          >
-            Sign Out
-          </button>
-        </nav>
-      </header>
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <Link to="/dashboard" className="flex items-center text-green-600 hover:text-green-700">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+                Back to Dashboard
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full text-center">
