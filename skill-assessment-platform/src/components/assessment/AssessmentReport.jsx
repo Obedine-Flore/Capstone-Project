@@ -60,6 +60,7 @@ const AssessmentReport = () => {
             key: `${item.skill_name || "Unknown Skill"}-${index}`,
             skillName: item.skill_name || "Unknown Skill",
             score: item.skill_score || 0,
+            time_taken: item.skill_time_taken || 0,
           })),
         };
 
@@ -104,6 +105,7 @@ const AssessmentReport = () => {
             completion_date: assessment.completed_at,
             score: assessment.score,
             passed: assessment.score >= 70,
+            time_taken: assessment.time_taken,
           }));
 
           setAssessmentHistory(formattedData);
@@ -295,7 +297,7 @@ const AssessmentReport = () => {
                 <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
                   <div className="text-sm text-gray-500">Time Taken</div>
                   <div className="text-3xl font-bold text-green-600">
-                    {reportData.assessmentDetails.time_taken || "N/A"} min
+                    {reportData.assessmentDetails.time_taken || "N/A"} mins
                   </div>
                 </div>
               </div>

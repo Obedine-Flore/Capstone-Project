@@ -57,6 +57,7 @@ router.get('/assessment-report/:id', async (req, res) => {
           ua.user_id,
           ua.assessment_id,
           ua.score,
+          ua.time_taken,
           ua.completed_at,
           a.title,
           a.description

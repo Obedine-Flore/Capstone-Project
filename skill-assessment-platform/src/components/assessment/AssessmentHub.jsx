@@ -117,7 +117,8 @@ const Assessment = () => {
           title: assessment.title,
           completion_date: assessment.completed_at,
           score: assessment.score,
-          passed: assessment.score >= 70
+          passed: assessment.score >= 70,
+          time_taken: assessment.time_taken
         }));
         
         setUserAssessments(formattedData);
@@ -240,7 +241,7 @@ const Assessment = () => {
                         </div>
                         <div className="flex items-center">
                           <span className="mr-2">🔄</span>
-                          <span>{assessment.attempts_allowed ? 'Multiple attempts allowed' : 'Single attempt only'}</span>
+                          <span>{assessment.attempts_allowed ? 'Multiple attempts allowed' : 'Multiple attempts'}</span>
                         </div>
                       </div>
                     </div>

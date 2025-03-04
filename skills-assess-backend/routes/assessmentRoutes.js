@@ -70,6 +70,7 @@ router.get('/api/user-assessment-history', async (req, res) => {
           ua.assessment_id,
           ua.score,
           ua.completed_at,
+          ua.time_taken,
           a.title
         FROM user_assessments ua
         LEFT JOIN assessments a ON ua.assessment_id = a.id
@@ -90,17 +91,17 @@ router.get('/api/user-assessment-history', async (req, res) => {
 
 router.post('/:assessmentId/submit', async (req, res) => {
     const { assessmentId } = req.params;
-    const { userId, score } = req.body;
+    const { userId, score, time_taken } = req.body;
     const completedAt = new Date();
   
     try {
       // Step 1: Insert assessment result
       const insertAssessmentQuery = `
-        INSERT INTO user_assessments (user_id, assessment_id, score, completed_at) 
-        VALUES (?, ?, ?, ?)
+        INSERT INTO user_assessments (user_id, assessment_id, score, completed_at, time_taken) 
+        VALUES (?, ?, ?, ?, ?)
       `;
   
-      const [results] = await pool.query(insertAssessmentQuery, [userId, assessmentId, score, completedAt]);
+      const [results] = await pool.query(insertAssessmentQuery, [userId, assessmentId, score, completedAt, time_taken]);
       const userAssessmentId = results.insertId;
   
       // Step 2: Generate and store report
@@ -112,7 +113,8 @@ router.post('/:assessmentId/submit', async (req, res) => {
         assessmentId,
         score,
         userAssessmentId,
-        reportId: reportResult.reportId
+        reportId: reportResult.reportId,
+        time_taken
       });
   
     } catch (error) {

@@ -74,33 +74,32 @@ app.get('/api/assessments', async (req, res) => {
   }
 });
 
-app.post('/api/assessments/:assessmentId/submit', authenticateUser, (req, res) => {
-  const { assessmentId } = req.params;
-  const { userId, score, total } = req.body;
-  
-  // If you're using middleware for authentication, you might get userId from req.user instead
-  // const userId = req.user.id;
-  
-  const query = `
-    INSERT INTO user_assessments (user_id, assessment_id, score) 
-    VALUES (?, ?, ?)
-  `;
-  
-  connection.query(query, [userId, assessmentId, score], (err, results) => {
-    if (err) {
-      console.error('Error storing assessment result:', err);
-      return res.status(500).json({ error: 'Failed to save assessment result' });
-    }
-    
-    return res.json({
-      success: true,
-      message: 'Assessment submitted successfully',
-      assessmentId,
+app.post('/api/assessments/:assessmentId/submit', async (req, res) => {
+  const { userId, assessmentId, score, time_taken } = req.body;
+
+  console.log("Received submission data:", req.body); // Debugging log
+
+  try {
+    const query = `
+      INSERT INTO assessment_reports (user_assessment_id, user_id, assessment_id, score, time_taken, completed_at)
+      VALUES (?, ?, ?, ?, ?, NOW())
+    `;
+    const [result] = await db.execute(query, [user_assessmentId, userId, assessmentId, score, time_taken]);
+
+    console.log("Database insert result:", result);
+
+    res.json({ 
+      success: true, 
+      message: "Assessment submitted and report generated successfully", 
+      assessmentId, 
       score,
-      total,
-      id: results.insertId
+      time_taken,
+      userAssessmentId: result.insertId 
     });
-  });
+  } catch (error) {
+    console.error("Error saving assessment report:", error);
+    res.status(500).json({ error: "Failed to save assessment report" });
+  }
 });
 
 app.use('/api/profile', authMiddleware);
@@ -128,8 +127,6 @@ app.get("/api/assessment-report/:id", async (req, res) => {
     }
     res.json(report);
 });
-
-
 
 app.get('/api/assessment-report/:id', async (req, res) => {
   const { id } = req.params;
@@ -216,6 +213,23 @@ app.get('/api/all-skills', async (req, res) => {
       console.error("Error fetching skills:", error);
       res.status(500).json({ message: "Internal Server Error" });
   }
+});
+
+app.post("/api/contact", (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  const query = "INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)";
+  connection.query(query, [name, email, message], (err, result) => {
+    if (err) {
+      console.error("Error inserting data:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.status(201).json({ message: "Message sent successfully" });
+  });
 });
 
 // Authentication middleware example (if you're using JWT)

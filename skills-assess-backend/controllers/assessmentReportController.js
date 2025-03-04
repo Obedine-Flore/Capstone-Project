@@ -11,6 +11,7 @@ const generateAndStoreAssessmentReport = async (userAssessmentId) => {
           ua.user_id,
           ua.assessment_id,
           ua.score,
+          ua.time_taken,
           ua.completed_at,
           a.title,
           a.description
@@ -35,11 +36,12 @@ const generateAndStoreAssessmentReport = async (userAssessmentId) => {
           user_id,
           assessment_id,
           score,
+          time_taken,
           completed_at,
           title,
           description,
           feedback
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
   
       const reportValues = [
@@ -47,6 +49,7 @@ const generateAndStoreAssessmentReport = async (userAssessmentId) => {
         assessment.user_id,
         assessment.assessment_id,
         assessment.score,
+        assessment.time_taken,
         assessment.completed_at,
         assessment.title,
         assessment.description,
