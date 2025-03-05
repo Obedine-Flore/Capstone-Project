@@ -143,7 +143,7 @@ const Dashboard = () => {
     }
   };
 
-  // Generate recommendations based on assessment history
+  {/*// Generate recommendations based on assessment history
   const generateRecommendations = (history) => {
     // Logic to generate recommendations:
     // 1. Skills with low scores that need improvement
@@ -159,6 +159,20 @@ const Dashboard = () => {
     
     // Fetch recommended skills based on the analysis
     fetchRecommendedSkills(lowScoreSkills, 1);
+  }; */}
+
+  const generateRecommendations = (history) => {
+    const lowScoreSkills = history
+      .filter(assessment => assessment.score < 70)
+      .map(assessment => assessment.skillId);
+  
+    // Remove duplicates from lowScoreSkills
+    const uniqueLowScoreSkills = [...new Set(lowScoreSkills)];
+  
+    setRelevantSkillIds(uniqueLowScoreSkills);
+    
+    // Fetch recommended skills based on the analysis
+    fetchRecommendedSkills(uniqueLowScoreSkills, 1);
   };
 
   const fetchRecommendedSkills = async (skillIds, page = 1) => {
@@ -181,10 +195,17 @@ const Dashboard = () => {
   
       const { skills, hasMore } = response.data;
   
+      // Deduplication logic
+      const uniqueSkills = page === 1
+        ? skills
+        : skills.filter(
+            newSkill => !recommendedSkills.some(existingSkill => existingSkill.id === newSkill.id)
+          );
+  
       if (page === 1) {
-        setRecommendedSkills(skills);
+        setRecommendedSkills(uniqueSkills);
       } else {
-        setRecommendedSkills(prev => [...prev, ...skills]);
+        setRecommendedSkills(prev => [...prev, ...uniqueSkills]);
       }
   
       setHasMoreRecommended(hasMore);
@@ -288,7 +309,7 @@ const Dashboard = () => {
         <div className="flex justify-center mt-10">
           <button
             onClick={onLoadMore}
-            className="flex items-center px-8 py-3 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors border border-green-200 hover:border-green-300 shadow-sm hover:shadow"
+            className="flex items-center px-8 py-3 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors border border-green-300 hover:border-green-400 shadow-sm hover:shadow"
           >
             See More <ChevronDown className="ml-2" size={16} />
           </button>

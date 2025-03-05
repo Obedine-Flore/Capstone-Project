@@ -71,6 +71,11 @@ const ProfileSection = () => {
                 Back to Dashboard
               </Link>
             </div>
+            <div className="flex items-center space-x-4">
+              <button onClick={() => navigate("/")} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+              Sign Out
+              </button>
+            </div>
           </div>
         </div>
       </nav>

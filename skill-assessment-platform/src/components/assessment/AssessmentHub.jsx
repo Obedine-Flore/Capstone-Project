@@ -175,11 +175,11 @@ const Assessment = () => {
 
         {/* Available Assessments */}
         <section className="mb-16">
-  <div className="flex items-center mb-6">
-    <h3 className="text-2xl font-semibold text-green-700">
+       <div className="flex items-center mb-6">
+      <h3 className="text-2xl font-semibold text-green-700">
       Available Assessments
-    </h3>
-    <div className="h-px flex-grow bg-gray-200 ml-4"></div>
+      </h3>
+      <div className="h-px flex-grow bg-gray-200 ml-4"></div>
   </div>
   
   {/* Loading indicator */}

@@ -62,9 +62,10 @@ const LandingPage = () => {
             
             <div className="flex justify-center mb-8">
             <img 
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRimrMWSsaK8oYOHl6FVUamWxXjJ-MWaG5KTQ&s" 
-              alt="SkillsAssess Frog Mascot" 
-              className="w-68 h-72 object-cover"
+              //src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRimrMWSsaK8oYOHl6FVUamWxXjJ-MWaG5KTQ&s" 
+              src="../../../assets/Landing_image.png"
+              alt="SkillsAssess Mascot" 
+              className="w-120 h-100 object-cover"
             />
             </div>
           </div>

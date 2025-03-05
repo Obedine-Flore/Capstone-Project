@@ -14,6 +14,7 @@ const connection = require('./config/db');
 const userAssessmentRoutes = require('./routes/userAssessmentRoutes');
 
 const recommendedSkillsRoutes = require('./routes/skills');
+const leaderboardRoutes = require('./routes/leaderboardRoutes');
 
 // Configure storage for blog images
 const blogStorage = multer.diskStorage({
@@ -47,6 +48,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/api/profile', authMiddleware);
 app.use('/', ProfileRoutes);
 app.use(blogRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
 
 // Test route
 app.get('/api/test', (req, res) => {
@@ -232,17 +234,25 @@ app.get('/api/all-skills', async (req, res) => {
 
 app.post("/api/contact", (req, res) => {
   const { name, email, message } = req.body;
+  
+  console.log("Received contact form submission:", { name, email, message });
 
   if (!name || !email || !message) {
+    console.warn("Validation failed: Missing fields");
     return res.status(400).json({ error: "All fields are required" });
   }
 
   const query = "INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)";
   connection.query(query, [name, email, message], (err, result) => {
     if (err) {
-      console.error("Error inserting data:", err);
-      return res.status(500).json({ error: "Database error" });
+      console.error("Detailed database error:", err);
+      return res.status(500).json({ 
+        error: "Database error", 
+        details: err.message 
+      });
     }
+    
+    console.log("Message inserted successfully");
     res.status(201).json({ message: "Message sent successfully" });
   });
 });

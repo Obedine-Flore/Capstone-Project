@@ -15,11 +15,46 @@ const ContactUs = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
+    
+    try {
+      // Update the URL to match your actual backend endpoint
+      const response = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+  
+      const result = await response.json();
+      
+      if (response.ok) {
+        // Use state to manage success message instead of alert
+        setSuccessMessage("Message sent successfully!");
+        setFormData({ name: "", email: "", message: "" }); // Reset form
+        
+        // Optional: Clear success message after a few seconds
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } else {
+        // Handle specific error messages
+        setSuccessMessage(result.error || "Something went wrong");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setSuccessMessage("Network error. Please try again.");
+    }
   };
+  
+  // In the JSX, add a success message display
+  {successMessage && (
+    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+      {successMessage}
+    </div>
+  )}  
 
   return (
     <div className="min-h-screen bg-green-500">
@@ -37,10 +72,10 @@ const ContactUs = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="text-gray-600 hover:text-gray-800">Log In</button>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+        <button onClick={() => navigate("/SignIn")} className="text-gray-600 hover:text-gray-800">Log In</button>
+        <button onClick={() => navigate("/SignUp")} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
             Sign Up
-          </button>
+        </button>
         </div>
       </nav>
       
@@ -48,9 +83,10 @@ const ContactUs = () => {
         <div className="bg-white rounded-lg shadow-lg p-12 max-w-5xl mx-auto flex items-center">
           <div className="w-1/2 pr-8">
             <img 
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRimrMWSsaK8oYOHl6FVUamWxXjJ-MWaG5KTQ&s" 
+              src="../../../assets/Landing_image.png"
               alt="SkillsAssess Frog Mascot" 
-              className="w-full object-contain"
+              className="w-100 h-100 object-cover"
+              //style="width:128px;height:128px"
             />
           </div>
           

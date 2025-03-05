@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom";
 
 const AboutUs = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-green-500">
       <nav className="flex justify-between items-center py-4 px-8 bg-white">
@@ -17,10 +19,10 @@ const AboutUs = () => {
         </div>
         
         <div className="flex items-center space-x-4">
-          <button className="text-gray-600 hover:text-gray-800">Log In</button>
-          <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+        <button onClick={() => navigate("/SignIn")} className="text-gray-600 hover:text-gray-800">Log In</button>
+        <button onClick={() => navigate("/SignUp")} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
             Sign Up
-          </button>
+        </button>
         </div>
       </nav>
       
@@ -36,9 +38,9 @@ const AboutUs = () => {
           
           <div className="flex justify-center mb-8">
             <img 
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRimrMWSsaK8oYOHl6FVUamWxXjJ-MWaG5KTQ&s" 
-              alt="SkillsAssess Frog Mascot" 
-              className="w-64 h-68 object-cover"
+              src="../../../assets/Landing_image.png"
+              alt="SkillsAssess Mascot" 
+              className="width:128px; height:128px;"
             />
           </div>
         </div>
