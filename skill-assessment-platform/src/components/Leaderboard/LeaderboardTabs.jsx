@@ -23,6 +23,19 @@ const Leaderboard = () => {
         setIsLoading(true);
         setError(null);
 
+        // Get the token from local storage
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        // Configure axios to send the token with every request
+        const config = {
+          headers: { 
+            Authorization: `Bearer ${token}` 
+          }
+        };
+
         // Fetch user profile
         const profile = await userService.getUserProfile();
         setUserData(profile);
@@ -32,26 +45,22 @@ const Leaderboard = () => {
         const skillLeaderboards = await leaderboardService.getSkillLeaderboards();
 
         // Fetch user's ranking
-        const ranking = await leaderboardService.getUserRanking(profile.id);
+        const userRankingResponse = await axios.get('/api/leaderboard/user-ranking', config);
         
-        // Fetch overall leaderboard
-        const overallResponse = await axios.get('/api/leaderboard/overall');
-        
-        // Fetch skill-wise leaderboard
-        const skillsResponse = await axios.get('/api/leaderboard/skills');
-        
-        // Fetch user ranking (requires authentication)
-        const userRankingResponse = await axios.get('/api/leaderboard/user-ranking');
+        // Set the data from the response, not the entire response object
+        setUserRanking(userRankingResponse.data);
 
-
-        // Defensive checks
         setLeaderboardData({
           overall: overallLeaderboard,
           skills: skillLeaderboards
         });
-        setUserRanking(ranking);
       } catch (error) {
         console.error('Error fetching leaderboard data:', error);
+        setError('Failed to load leaderboard data. Please try again later.');
+        if (error.response && error.response.status === 401) {
+          // Redirect to login or refresh token
+          alert('Authentication failed. Please log in again.');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -73,13 +82,13 @@ const Leaderboard = () => {
 
   // Render leaderboard table
   const renderLeaderboardTable = (data) => {
-    {/*if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(data) || data.length === 0) {
       return (
         <div className="bg-white rounded-xl shadow-sm p-6 text-center text-gray-500">
           No leaderboard data available
         </div>
       );
-    }*/}
+    }
     return (
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <table className="w-full">

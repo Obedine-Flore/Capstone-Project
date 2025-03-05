@@ -26,7 +26,7 @@ export const leaderboardService = {
 
   getUserRanking: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/user-ranking`);
+      const response = await axios.get(`${BASE_URL}/user-ranking`)
       return response.data;
     } catch (error) {
       console.error('Error fetching user ranking:', error);

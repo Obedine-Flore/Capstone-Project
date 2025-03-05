@@ -14,7 +14,7 @@ const connection = require('./config/db');
 const userAssessmentRoutes = require('./routes/userAssessmentRoutes');
 
 const recommendedSkillsRoutes = require('./routes/skills');
-const leaderboardRoutes = require('./routes/leaderboardRoutes');
+const leaderboardRoutes = require('./routes/leaderBoardRoutes');
 
 // Configure storage for blog images
 const blogStorage = multer.diskStorage({
