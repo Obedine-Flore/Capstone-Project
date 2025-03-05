@@ -215,7 +215,7 @@ const Leaderboard = () => {
             className={`px-6 py-2 rounded-lg transition-all ${
               activeTab === 'skills' 
                 ? 'bg-green-600 text-white' 
-                : 'bg-gray-100 text-gray-700 hover:bg-green-100'
+                : 'bg-gray-300 text-gray-700 hover:bg-green-100'
             }`}
           >
             Skill-wise Ranking
