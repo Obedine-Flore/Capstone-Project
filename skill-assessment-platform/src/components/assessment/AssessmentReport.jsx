@@ -261,7 +261,7 @@ const AssessmentReport = () => {
                 <div className="bg-white shadow-sm rounded-lg p-6 inline-block">
                   <div className="text-sm text-gray-500">Time Taken</div>
                   <div className="text-3xl font-bold text-green-600">
-                    {reportData.assessmentDetails.time_taken || "N/A"} mins
+                    {reportData.assessmentDetails.time_taken || "N/A"} secs
                   </div>
                 </div>
               </div>

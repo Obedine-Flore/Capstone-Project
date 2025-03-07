@@ -23,16 +23,31 @@ router.post('/register', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    await User.createUser(name, email, hashedPassword);
+    
+    // Capture the result of user creation
+    const result = await User.createUser(name, email, hashedPassword);
+    
+    // Get the user ID based on what createUser returns
+    // This might need to be adjusted based on your actual implementation
+    const userId = result.id || result.insertId || result;
+    
+    // Check if jwtSecret exists
+    if (!jwtSecret) {
+      return res.status(500).json({ message: 'Server error: JWT_SECRET is not defined' });
+    }
+    
+    // Create a token
+    const token = jwt.sign({ id: userId, email, name }, jwtSecret, { expiresIn: '1h' });
 
-    res.status(201).json({ message: 'User registered successfully',
+    res.status(201).json({ 
+      message: 'User registered successfully',
       token,
       user: {
         id: userId,
         name,
         email
       }
-     });
+    });
   } catch (error) {
     console.error("Error during registration:", error);
     res.status(500).json({ message: 'Internal Server Error' });

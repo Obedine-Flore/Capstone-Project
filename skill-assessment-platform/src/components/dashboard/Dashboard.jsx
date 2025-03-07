@@ -339,7 +339,7 @@ const Dashboard = () => {
         <div className="bg-gradient-to-r from-green-50 to-teal-50 rounded-2xl p-8 mb-10 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-            <h1>{t("dashboard")}</h1>
+            {/*<h1>{t("dashboard")}</h1>*/}
               <h2 className="text-2xl font-semibold text-gray-800">Hello {userName || 'Guest'},</h2>
               <p className="text-lg text-green-700 font-medium mt-2">
                 Ready to enhance your skills today?
