@@ -82,17 +82,17 @@ Link:https://www.figma.com/design/kop3vnP1GSGure8CmyM3TV/SkillsAssess?node-id=0-
 
 ## App Interface
 
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLanding.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessContact)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessLogin.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessDashboard.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessAssessments.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessBlog.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessProfile.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessQuestions.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssessReport.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/Database.png)
-![Alt text](skill-assessment-platform/assets/app-interface-screenshots/SkillsAssess_System%20Architecture.drawio.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs1.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs2.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs3.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs4.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs5.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs6.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs7.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs8.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs9.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs10.png)
+![Alt text](skill-assessment-platform/assets/final_product/cs11.png)
 
 ## Deployment Plan
 ### Backend Deployment
@@ -105,7 +105,7 @@ PM2 will be configured to keep the backend running efficiently.
 Nginx will be used as a reverse proxy to manage API requests.
 
 ### Frontend Deployment
-The React application will be deployed using Netlify.
+The React application will be deployed using Vercel.
 
 Proper configuration will ensure that the frontend communicates seamlessly with the deployed backend via the correct API endpoints.
 
@@ -124,13 +124,13 @@ GitHub Actions, Jenkins, or Travis CI will be used to automate deployments.
 
 Automatic deployments will be set up to trigger on push to the main branch or a designated deployment branch.
 
-## Video Demo
+## Prototype Video Demo
 
 https://drive.google.com/file/d/1tF8Z5SVkptgX4GGKRcnFkx1-khx4GRFn/view?usp=sharing
 
-## Final Implementation In Progress Video
+## Final Implementation Demo Video
 
-https://drive.google.com/file/d/1xvCOWleQEtchH5DP6kj-DF9nU7zbUt-i/view?usp=sharing
+https://drive.google.com/file/d/18E0t1uVk43hYg46gATjJlfYOn2to3zcq/view?usp=sharing
 
 ## Link to Deployed Application
 
