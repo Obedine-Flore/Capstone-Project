@@ -19,7 +19,7 @@ describe('Route Tests', () => {
     expect(response.body.message).toBe('API is working');
   });
 
-  // Add a test to check if the server responds to unknown routes
+  // Added a test to check if the server responds to unknown routes
   it('should handle unknown routes', async () => {
     const response = await request(app).get('/api/nonexistent-route');
     expect(response.statusCode).toBe(404);

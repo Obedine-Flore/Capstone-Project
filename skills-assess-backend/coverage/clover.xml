@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1741353261174" clover="3.2.0">
-  <project timestamp="1741353261174" name="All files">
+<coverage generated="1742405216479" clover="3.2.0">
+  <project timestamp="1742405216479" name="All files">
     <metrics statements="685" coveredstatements="185" conditionals="167" coveredconditionals="17" methods="87" coveredmethods="8" elements="939" coveredelements="210" complexity="0" loc="685" ncloc="685" packages="6" files="15" classes="15"/>
     <package name="skills-assess-backend">
       <metrics statements="157" coveredstatements="53" conditionals="33" coveredconditionals="1" methods="21" coveredmethods="3"/>
@@ -173,7 +173,7 @@
         <line num="2" count="2" type="stmt"/>
         <line num="4" count="2" type="stmt"/>
         <line num="15" count="2" type="stmt"/>
-        <line num="16" count="2" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
         <line num="17" count="0" type="stmt"/>
         <line num="19" count="2" type="stmt"/>
       </file>
