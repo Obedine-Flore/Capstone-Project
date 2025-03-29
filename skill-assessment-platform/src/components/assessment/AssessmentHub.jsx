@@ -356,6 +356,19 @@ const Assessment = () => {
               <p className="text-gray-600">No assessment history found</p>
             </div>
           )}
+
+          {/* See More Button */}
+    {assessments.length > 6 && !showAllAssessments && (
+      <div className="flex justify-center mt-8">
+        <button
+          onClick={() => setShowAllAssessments(true)}
+          className="flex items-center px-8 py-3 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors border border-green-300 hover:border-green-400 shadow-sm hover:shadow"
+        >
+          See More Assessments
+          <ChevronDown className="w-5 h-5" />
+        </button>
+      </div>
+    )}
         </section>
       </main>
 

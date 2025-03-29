@@ -91,6 +91,12 @@ const BlogPost = () => {
             <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
               {post.category}
             </span>
+            {post.read_time && (
+              <>
+                <span className="mx-2">•</span>
+                <span>{post.read_time}</span>
+              </>
+            )}
           </div>
         </header>
 
@@ -106,9 +112,11 @@ const BlogPost = () => {
           />
         </div>
 
-        <div className="prose prose-green max-w-none">
-          {post.content}
-        </div>
+        {/* Here's the key change - using dangerouslySetInnerHTML to render the HTML content */}
+        <div 
+          className="prose prose-green max-w-none" 
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
         <footer className="mt-8 pt-8 border-t border-gray-200">
           <div className="flex items-center">

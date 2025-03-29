@@ -59,7 +59,7 @@ router.get('/api/profile', async (req, res) => {
         
         // Get user profile excluding sensitive information
         const [users] = await pool.query(
-            'SELECT id, name, email, bio, profile_picture, created_at FROM Users WHERE id = ?',
+            'SELECT id, name, email, bio, profile_picture, is_admin, created_at FROM Users WHERE id = ?',
             [req.user.id]
         );
         

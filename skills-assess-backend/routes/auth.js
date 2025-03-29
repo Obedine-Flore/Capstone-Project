@@ -37,7 +37,7 @@ router.post('/register', async (req, res) => {
     }
     
     // Create a token
-    const token = jwt.sign({ id: userId, email, name }, jwtSecret, { expiresIn: '1h' });
+    const token = jwt.sign({ id: userId, email, name, is_admin }, jwtSecret, { expiresIn: '1h' });
 
     res.status(201).json({ 
       message: 'User registered successfully',
@@ -45,7 +45,8 @@ router.post('/register', async (req, res) => {
       user: {
         id: userId,
         name,
-        email
+        email,
+        is_admin
       }
     });
   } catch (error) {
@@ -93,7 +94,8 @@ router.post('/login', async (req, res) => {
         user: {
           id: user.id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          is_admin: user.is_admin 
         }
       });
 

@@ -4,6 +4,7 @@ import { Trophy, Users, Award } from 'lucide-react';
 import Navbar from '../Navbar';
 import { userService } from '../../services/userService';
 import { leaderboardService } from '../../services/leaderboardService';
+import profilePic from "../../assets/profile.jpg";
 
 const Leaderboard = () => {
   const [userData, setUserData] = useState(null);
@@ -89,7 +90,7 @@ const Leaderboard = () => {
         </div>
       );
     }
-    return (
+return (
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
@@ -109,11 +110,15 @@ const Leaderboard = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden">
-                    <img 
-                      src={user.avatar || '/default-avatar.png'} 
-                      alt={user.username} 
-                      className="w-full h-full object-cover"
-                    />
+                  <img 
+                  src={user.avatar || profilePic} 
+                  alt={user.username} 
+                  onError={(e) => {
+                  e.target.onerror = null; // Prevent infinite loop if profilePic also fails
+                  e.target.src = profilePic; // Explicitly set to profilePic
+                  }}
+                  className="w-full h-full object-cover"
+                  />
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-900">{user.username}</div>

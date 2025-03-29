@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
@@ -36,7 +38,7 @@ const SignIn = () => {
         // Get token
         const token = response.data.token;
         
-        // Then use the login function from your context
+        // Then use the login function from my context
         login(userData, token);
         
         // Navigate to dashboard
@@ -70,72 +72,111 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-bold text-center mb-6 text-green-600">
-          Sign In
-        </h2>
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        {/* Navigation */}
+        <nav className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16 items-center">
+              <Link 
+                to="/" 
+                className="flex items-center text-green-600 hover:text-green-700 transition-colors"
+              >
+                <ChevronLeft className="mr-2" />
+                Back to Landing Page
+              </Link>
+            </div>
+          </div>
+        </nav>
+  
+        {/* SignIn Form Container */}
+        <div className="flex-grow flex items-center justify-center p-4">
+          <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+            <h2 className="text-3xl font-bold text-center mb-6 text-green-600">
+              Sign In
+            </h2>
+
+            {/* Error Message */}
         {error && (
-          <div className="mb-4 p-2 text-red-600 bg-red-50 rounded text-sm">
-            {error}
+          <div className="mb-4 p-3 text-red-700 bg-red-50 rounded-lg text-sm flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <span>{error}</span>
           </div>
         )}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+            
+          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Email Input */}
+          <div>
             <input
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               required
             />
           </div>
-          <div className="mb-4">
+
+          {/* Password Input */}
+          <div>
             <input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               required
             />
           </div>
-          <div className="mb-4 flex items-center">
-            <input
-              type="checkbox"
-              id="rememberMe"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="mr-2 text-green-600 focus:ring-green-500"
-            />
-            <label htmlFor="rememberMe" className="text-gray-700">
-              Remember Me
-            </label>
+
+          {/* Remember Me & Forgot Password */}
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="mr-3 text-green-600 rounded focus:ring-green-500"
+              />
+              <label htmlFor="rememberMe" className="text-gray-700 text-sm">
+                Remember Me
+              </label>
+            </div>
+            <Link 
+              to="/forgot-password" 
+              className="text-green-600 hover:underline text-sm font-medium"
+            >
+              Forgot password?
+            </Link>
           </div>
+  
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-300"
+            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isLoading}
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
-          <div className="mt-4 text-center">
-            <a href="#" className="text-green-600 hover:underline text-sm">
-              Forgot password?
-            </a>
-          </div>
-          <div className="mt-4 text-center">
+
+          {/* Sign Up Link */}
+          <div className="text-center mt-4">
             <span className="text-gray-600 text-sm">
               Don't have an account?{" "}
-              <a href="/signup" className="text-green-600 hover:underline">
+              <Link 
+                to="/signup" 
+                className="text-green-600 hover:underline font-medium"
+              >
                 Sign Up
-              </a>
+              </Link>
             </span>
           </div>
-        </form>
+            </form>
+          </div>
+        </div>
       </div>
-    </div>
   );
 };
 

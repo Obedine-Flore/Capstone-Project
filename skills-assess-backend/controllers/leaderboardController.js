@@ -23,7 +23,8 @@ const getOverallLeaderboard = async (req, res) => {
       id: result.id,
       username: result.username,
       avatar: result.avatar || '/default-avatar.png',
-      score: parseFloat(result.score).toFixed(2)
+      //score: parseFloat(result.score).toFixed(2)
+      score: Math.round(parseFloat(result.score))
     }));
 
     res.json(formattedResults);
@@ -49,10 +50,11 @@ const getSkillwiseLeaderboard = async (req, res) => {
           u.id, 
           u.name AS username, 
           u.profile_picture AS avatar, 
-          COALESCE(ar.score, 0) AS score
+          COALESCE(SUM(ar.score), 0) AS score
         FROM users u
         JOIN assessment_reports ar ON u.id = ar.user_id
         WHERE ar.title = ?
+        GROUP BY u.id, u.name, u.profile_picture
         ORDER BY score DESC
         LIMIT 100
       `, [assessment.title]);
@@ -62,7 +64,7 @@ const getSkillwiseLeaderboard = async (req, res) => {
         id: result.id,
         username: result.username,
         avatar: result.avatar || '/default-avatar.png',
-        score: parseFloat(result.score).toFixed(2)
+        score: Math.round(parseFloat(result.score)) // Convert to whole number
       }));
 
       return {
@@ -113,13 +115,8 @@ const getUserRanking = async (req, res) => {
       WHERE user_id = ? AND score > 0
     `, [userId]);
 
-    // Debugging logs
-    console.log('User ID:', userId);
-    console.log('Global Rank Result:', globalRankResult);
-    console.log('Skills Mastered Result:', skillsMasteredResult);
-
     const userRanking = {
-      totalScore: globalRankResult[0]?.totalScore ? parseFloat(globalRankResult[0].totalScore).toFixed(2) : '0.00',
+      totalScore: globalRankResult[0]?.totalScore ? Math.round(parseFloat(globalRankResult[0].totalScore)) : 0,
       globalRank: globalRankResult[0]?.globalRank || 'N/A',
       skillsMastered: skillsMasteredResult[0].skillsMastered
     };

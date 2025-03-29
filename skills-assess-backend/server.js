@@ -12,7 +12,7 @@ const app = express();
 const jwt = require('jsonwebtoken');
 const connection = require('./config/db');
 const userAssessmentRoutes = require('./routes/userAssessmentRoutes');
-
+const adminRoutes = require('./routes/adminRoutes');
 const recommendedSkillsRoutes = require('./routes/skills');
 const leaderboardRoutes = require('./routes/leaderBoardRoutes');
 
@@ -39,7 +39,6 @@ const uploadBlogImage = multer({
 });
 
 // Middleware
-
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
@@ -50,12 +49,15 @@ app.use('/', ProfileRoutes);
 app.use(blogRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 
+// Add admin routes
+app.use('/api/admin', adminRoutes);
+
 // Test route
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working' });
 });
 
-// ✅ Ensure Auth Routes Are Loaded
+// Ensure Auth Routes Are Loaded
 const authRoutes = require("./routes/auth"); // Adjust path if needed
 app.use("/auth", authRoutes);
 
@@ -66,6 +68,7 @@ app.use('/api', recommendedSkillsRoutes);
 const assessmentRoutes = require('./routes/assessmentRoutes');
 app.use('/api/assessments', assessmentRoutes);
 
+// Rest of your routes remain the same...
 app.get('/api/assessments', async (req, res) => {
   try {
     const [assessments] = await connection.promise().query('SELECT * FROM assessments');
